@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Created by hyh on 16-9-14.
  */
-public class Model {
+public class ModelApi {
     @Autowired
     private ProjectOfferFileModelService projectOfferFileModelService;
 
