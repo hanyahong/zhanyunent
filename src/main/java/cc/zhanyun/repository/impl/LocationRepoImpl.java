@@ -104,6 +104,29 @@ public class LocationRepoImpl {
         this.mongoTemplate.upsert(new Query(
                 Criteria.where("_id").is(location.getOid())), update, "location");
     }
+
+    /**
+     * 更新部分字段
+     *
+     * @param location
+     */
+    public void updateLocationBase(Location location) {
+        BasicDBObject basicDBObject = new BasicDBObject();
+
+        basicDBObject
+                .put("$set", new BasicDBObject("name", location
+                        .getName())
+                        .append("address", location.getAddress())//联系地址
+                        .append("phone", location.getPhone())//联系电话
+                        .append("contacts", location.getContacts())//联系人
+                        .append("website", location.getContacts())//网址
+
+                );
+        Update update = new BasicUpdate(basicDBObject);
+
+        this.mongoTemplate.upsert(new Query(
+                Criteria.where("_id").is(location.getOid())), update, "location");
+    }
 }
 
 

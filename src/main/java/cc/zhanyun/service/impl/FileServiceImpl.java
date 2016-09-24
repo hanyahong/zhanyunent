@@ -1,7 +1,6 @@
 package cc.zhanyun.service.impl;
 
 import cc.zhanyun.model.ProjectOffer;
-import cc.zhanyun.model.ProjectOfferDefaultFileModel;
 import cc.zhanyun.model.file.FileManager;
 import cc.zhanyun.model.user.UserAccount;
 import cc.zhanyun.repository.impl.FileRepoImpl;
@@ -19,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.OutputStream;
 import java.util.List;
 
 @Service
@@ -40,31 +38,39 @@ public class FileServiceImpl implements FileService {
     @Autowired
     private HttpServletResponse response;
 
+    /**
+     * 上传文件
+     *
+     * @param file
+     * @return
+     */
     public String uploadFile(MultipartFile file) {
         if (FileUtil.verifyFileType(file).intValue() == 1) {
-
+            //文件存储基本路径
             String url = Constant.BASEPATH;
-
-            //System.out.println("上传地址：" + url);
             String oid = this.tokenutil.tokenToOid();
-
             String folder = "fileModel";
             String othername = FileUtil.getOtherName(file);
             String saveFile = FileUtil.createUserFiles(oid, url, folder);
+            //上传文件
             Integer status = FileUtil.uploadFile(file, saveFile);
-
+            //数据库持久化
+            // 如果文件上传成功
             if (status.intValue() == 1) {
+                //存储对象
                 FileManager fileManager = new FileManager();
                 fileManager.setName(file.getOriginalFilename());
+                System.out.println(file.getOriginalFilename());
                 fileManager.setOthername(othername);
                 fileManager.setUid(oid);
-
-                fileManager.setUrl(oid + File.separator + folder
-                        + File.separator);
+                fileManager.setUrl(oid + File.separator + folder + File.separator);
                 fileManager.setBasepath(url);
+                fileManager.setType(file.getContentType());
 
+
+                //数据持久化
                 this.fileRepoImpl.fileUpload(fileManager);
-
+                //返回值
                 return "上传成功";
             }
             if (status.intValue() == 0) {
@@ -88,23 +94,8 @@ public class FileServiceImpl implements FileService {
         ProjectOffer po = this.posi.selProjectOfferOne(oid);
         //查询用户
         UserAccount userAccount = this.userRepo.selUserById(uid);
-        //生成报价单文件
-        ProjectOfferDefaultFileModel model = projectOfferFileModelService.selDefaultModel();
-        //文件模板
-        String fileModel = null;
-        if (model == null) {
-            fileModel = "1";
-        } else {
-            fileModel = model.getUid();
-        }
-        String url = this.email.MongodbToFile(fileModel, po, userAccount);
-        //测试
-        //  System.out.println("查询返回的URL：" + url);
-        //查询文件管理系统中文件信息
-        FileManager filemanager = this.fileRepoImpl.selFileByOfferoid(uid, oid);
-        //获取文件资源
-        String u = Constant.BASEPATH + filemanager.getUrl() + filemanager.getOthername();
-        FileSystemResource file = new FileSystemResource(u);
+        String url = this.email.mongoDBToFile(po, userAccount);
+        FileSystemResource file = new FileSystemResource(url);
 
         return file;
     }

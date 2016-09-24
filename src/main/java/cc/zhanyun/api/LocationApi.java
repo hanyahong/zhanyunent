@@ -39,7 +39,7 @@ public class LocationApi {
     @ApiResponses({
             @io.swagger.annotations.ApiResponse(code = 200, message = "获取成功", response = LocationVO.class),
             @io.swagger.annotations.ApiResponse(code = 500, message = "服务器响应失败", response = LocationVO.class)})
-    @RequestMapping(value = {"/num/size"}, produces = {"application/json"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET})
+    @RequestMapping(value = {"/{num}/{size}"}, produces = {"application/json"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET})
     @ResponseBody
     public List<LocationVO> locationGet(
             @PathVariable("num") Integer num,
@@ -204,10 +204,9 @@ public class LocationApi {
     @ApiOperation(value = "查询场地独立列表(批量)", notes = "查询场地独立列表(批量) ", response = LocationList.class, responseContainer = "List")
     @RequestMapping(value = {"/list"}, produces = {"application/json"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET})
     @ResponseBody
-    public List<LocationList> locationListGet(@PathVariable("num") Integer num,
-                                              @PathVariable("size") Integer size)
+    public List<LocationList> locationListGet()
             throws NotFoundException {
-        return locationListService.selLocationListService(0, 10000);
+        return locationListService.selLocationListService();
     }
 
     /**

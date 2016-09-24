@@ -27,7 +27,7 @@ public interface LocationListService {
      * @return
      */
 
-    public List<LocationList> selLocationListService(Integer num ,Integer size);
+    public List<LocationList> selLocationListService();
 
     /**
      * 删除场地列表(批量)
@@ -43,6 +43,15 @@ public interface LocationListService {
      * @return
      */
     public Info addLocationListOne(LocationList locationList);
+
+    /**
+     * 单条修改
+     *
+     * @param locationList
+     * @return
+     */
+    public Info updateLocationListOne(LocationList locationList);
+
 
     /**
      * 单条删除

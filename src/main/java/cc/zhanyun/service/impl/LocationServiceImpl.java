@@ -5,6 +5,7 @@ import java.util.List;
 
 import cc.zhanyun.model.PageableInfo;
 import cc.zhanyun.model.location.LocationList;
+import cc.zhanyun.repository.impl.LocationListRepoImpl;
 import cc.zhanyun.service.LocationListService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -32,13 +33,18 @@ public class LocationServiceImpl implements LocationService {
     private TokenUtil tokenutil;
     @Autowired
     private ImageServiceImpl imageServiceImpl;
-
     @Autowired
-    private LocationListService locationListService;
+    private LocationListRepoImpl locationListRepo;
 
+    /**
+     * 单条添加场地
+     *
+     * @param location
+     * @return
+     */
     public LocationImageOidVO addLocation(Location location) {
-        LocationImageOidVO livo = new LocationImageOidVO();
 
+        LocationImageOidVO livo = new LocationImageOidVO();
         String oid = RandomUtil.getRandomFileName();
         String uid = this.tokenutil.tokenToOid();
         String locationImage = RandomUtil.getRandomFileName();
@@ -95,7 +101,8 @@ public class LocationServiceImpl implements LocationService {
             locationList.setName(location.getName());
             locationList.setWebsite(location.getWebsite());
             locationList.setPhone(location.getPhone());
-            locationListService.addLocationListOne(locationList);
+            locationList.setStatus(3);
+            locationListRepo.addLocationList(locationList);
             //返回值设定
             livo.setOid(oid);
             livo.setLocationimages(locationImage);
@@ -128,7 +135,7 @@ public class LocationServiceImpl implements LocationService {
             //删除场地信息
             this.locationRepo.delLocationById(oid);
             //删除场地独立列表
-            this.locationListService.delLocationListOne(oid);
+            this.locationListRepo.delLocationList(oid);
             //返回值设定
             info.setStatus("成功");
         } catch (Exception e) {
@@ -246,7 +253,7 @@ public class LocationServiceImpl implements LocationService {
             locationList.setAddress(location.getAddress());
             locationList.setName(location.getName());
             locationList.setWebsite(location.getWebsite());
-            locationListService.addLocationListOne(locationList);
+            locationListRepo.addLocationList(locationList);
             //返回值设定
             li.setLocationimages(location.getImages());
             li.setLhlist(llist);

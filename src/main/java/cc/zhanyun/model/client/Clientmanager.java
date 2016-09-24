@@ -29,6 +29,15 @@ public class Clientmanager {
     private String qq = null;
     private String remarks = null;
     private Integer status = null;
+    private String wechat = null;
+
+    public String getWechat() {
+        return wechat;
+    }
+
+    public void setWechat(String wechat) {
+        this.wechat = wechat;
+    }
 
     public Integer getStatus() {
         return status;

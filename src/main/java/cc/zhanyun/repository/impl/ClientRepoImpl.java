@@ -77,8 +77,8 @@ public class ClientRepoImpl {
      * @param name
      * @return
      */
-    public Clientmanager selClientByName(String name,String uid) {
-        return this.clientrepo.findByNameAndUid(name,uid);
+    public Clientmanager selClientByName(String name, String uid) {
+        return this.clientrepo.findByNameAndUid(name, uid);
     }
 
     /**
@@ -91,7 +91,7 @@ public class ClientRepoImpl {
     }
 
     /**
-     * 单挑更新
+     * 单条更新
      *
      * @param client
      */
@@ -110,6 +110,30 @@ public class ClientRepoImpl {
                 .append("website", client.getWebsite())
                 .append("address", client.getAddress())
                 .append("_abstract", client.getAbstract()));
+
+        Update update = new BasicUpdate(basicDBObject);
+
+        this.mongoTemplate.upsert(new Query(Criteria.where("_id")
+                .is(client.getOid())), update, "clientmanager");
+    }
+
+    /**
+     * 更新部分字段
+     *
+     * @param client
+     */
+    public void updateClientBase(Clientmanager client) {
+        BasicDBObject basicDBObject = new BasicDBObject();
+
+        basicDBObject.put("$set", new BasicDBObject("name", client
+
+                .getName())
+                .append("company", client.getCompany())
+                .append("tel", client.getTel())
+                .append("email", client.getEmail())
+                .append("qq", client.getQq())
+                .append("wechat", client.getWechat())
+        );
 
         Update update = new BasicUpdate(basicDBObject);
 

@@ -39,8 +39,8 @@ public class AccessTokenVerifyInterceptor extends HandlerInterceptorAdapter {
 
         boolean flag = false;
 
-        String accessToken = request.getHeader("token");
-        //String accessToken = "20160913146807";
+//        String accessToken = request.getHeader("token");
+        String accessToken = "20160913146807";
         if (StringUtils.isNotBlank(accessToken)) {
             UserAccount u = this.userRepoImpl.selUserByToken(accessToken);
             if (u != null) {

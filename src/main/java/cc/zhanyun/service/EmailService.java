@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.mail.internet.MimeMessage;
 
+import cc.zhanyun.model.*;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -19,10 +20,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import cc.zhanyun.util.Constant;
-import cc.zhanyun.model.Info;
-import cc.zhanyun.model.OfferSend;
-import cc.zhanyun.model.ProjectOffer;
-import cc.zhanyun.model.Status;
 import cc.zhanyun.model.file.FileManager;
 import cc.zhanyun.model.offer.Resourcetypes;
 import cc.zhanyun.model.offer.Selectedresources;
@@ -46,100 +43,159 @@ public class EmailService {
     private ProjectOfferService pos;
     @Autowired
     private FileRepoImpl fileImpl;
+    @Autowired
+    private ProjectOfferFileModelService projectOfferFileModelService;
+
 
     /**
-     * 发送邮件
+     * 发送报价单(邮件发送)
      *
      * @param offerSend
      * @return
      */
-    public Info sendAttachmentsMail(OfferSend offerSend) {
+    public Info sendOfferFileByMail(OfferSend offerSend) {
+        //返回值函数
         Info in = new Info();
+        //tokenToOid
         String uid = this.tokenutil.tokenToOid();
-        // 基本路径
+        //报价单文件流
+        FileSystemResource file = null;
+        //获取名称
+        String name = this.fileImpl.selFileByOfferoid(uid, offerSend.getOfferOid()).getName();
 
-        //获取文件绝对路径(打包后可用必须)
-        // URL au = this.getClass().getClassLoader().getResource(Constant.BASEPATH);
-        String basePath = Constant.BASEPATH;
-        System.out.println("发送邮件及文件下载地址：" + basePath);
-        try {
-            //发送邮件
-            MimeMessage mimeMessage = this.mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-            //查询用户
-            UserAccount u = this.userImpl.selUserById(uid);
-            //设置邮箱基本设置
-            helper.setFrom(Constant.EMAIL);
-            helper.setTo(offerSend.getTo());
-            helper.setSubject(u.getCompany() + offerSend.getName()
-                    + "报价单,请您查收--" + u.getName());
-            helper.setText("报价单");
-
-            //查询用户信息
-            UserAccount userAccount = this.userImpl.selUserById(uid);
-            //查询报价单信息
-            ProjectOffer po = this.pos.selProjectOfferOne(offerSend
-                    .getOfferOid());
-            //设置模板(暂时固定)
-            offerSend.setFileTemplateOid("1");
-            //查询文件信息
-            FileManager fileManager = this.fileImpl.fileDownload(offerSend
-                    .getFileTemplateOid());
-            String url = "1";
-            if (fileManager != null) {
-                url = fileManager.getUrl();
-            }
-
-            String filePath = MongodbToFile(url, po, userAccount);
-            if (filePath != null) {
-                FileSystemResource file = new FileSystemResource(new File(
-                        basePath + File.separator + filePath));
-
-                String name = this.fileImpl.selFileByOfferoid(uid,
-                        offerSend.getOfferOid()).getName();
+        //查询用户信息
+        UserAccount userAccount = this.userImpl.selUserById(uid);
+        //查询报价单信息
+        ProjectOffer po = this.pos.selProjectOfferOne(offerSend.getOfferOid());
+        String filePath = mongoDBToFile(po, userAccount);
+        //如果非空,才发送文件
+        if (filePath != null) {
+            //导入文件
+            file = new FileSystemResource(new File(filePath));
+            try {
+                //发送邮件
+                MimeMessage mimeMessage = this.mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+                //设置邮箱基本设置
+                helper.setFrom(Constant.EMAIL);
+                helper.setTo(offerSend.getTo());
+                helper.setSubject(userAccount.getCompany() + offerSend.getName() + "报价单,请您查收--" + userAccount.getName());
+                helper.setText("报价单");
                 helper.addAttachment(name, file);
-
+                //发送
                 this.mailSender.send(mimeMessage);
+                //状态值设定
                 in.setStatus("发送成功");
-            } else {
-                in.setStatus("发送失败，模板有空格或空行");
+            } catch (Exception e) {
+                in.setStatus("发送失败");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            in.setStatus("发送失败");
+        } else {
+            in.setStatus("发送失败，模板有空格或空行");
         }
         return in;
     }
 
+
     /**
-     * 解析数据库数据到文件
+     * 解析数据库数据到文件*
      *
-     * @param url
      * @param po
      * @param userAccount
      * @return
      */
-    public String MongodbToFile(String url, ProjectOffer po, UserAccount userAccount) {
-        // 获取oid
-        String oid = this.tokenutil.tokenToOid();
-        // 获取模板路径
-        String basePath = Constant.BASEPATH;
-        // test
-        System.out.println(basePath);
-        // 如果模板为空,使用默认模板
-        if (url.equals("1")) {
-            // 默认模板路径
-            url = basePath + "offerlist.xls";
+    public String mongoDBToFile(ProjectOffer po, UserAccount userAccount) {
+        String oid = tokenutil.tokenToOid();
+        //查询模板文件名
+        ProjectOfferDefaultFileModel p = projectOfferFileModelService.selDefaultModel();
+        String fileUrl = null;
+        if (p != null) {
+            fileUrl = Constant.BASEPATH + Constant.OFFERMODELS + File.separator + p.getOthername();
+        } else {
+            fileUrl = Constant.BASEPATH + "offerlist.xls";
         }
+        //模板路径
+        String outUrl = null;
+        //基本绝对路径(系统操作使用)
+        String fileSaveUrl = FileUtil.createUserFiles(oid, Constant.BASEPATH, Constant.OFFERFILENAME);
+        //相对路径(远程转移时使用)
+        String saveurl = oid + File.separator + Constant.OFFERFILENAME + File.separator;
+        //查询文件库中是否生成过
+        FileManager fm = this.fileImpl.selFileByOfferoid(oid, po.getOid());
+        //如果为空,第一次
+        FileManager filemanager = new FileManager();
+        filemanager.setDate(new Date().toString());
+        String newFileName = null;
+        if (fm == null) {
+            newFileName = RandomUtil.getRandomFileName() + ".xls";
+            filemanager.setName(po.getName() + ".xls");
+            filemanager.setOthername(newFileName);
+            filemanager.setBasepath(Constant.BASEPATH);
+            filemanager.setUrl(saveurl);
+            filemanager.setUid(oid);
+            filemanager.setOfferOid(po.getOid());
+        } else {
+            newFileName = fm.getOthername();
+            filemanager.setOid(fm.getOid());
+            filemanager.setName(fm.getName());
+            filemanager.setOthername(newFileName);
+            filemanager.setUrl(fm.getUrl());
+            filemanager.setUid(fm.getUid());
+            filemanager.setBasepath(fm.getBasepath());
+            filemanager.setOfferOid(fm.getOfferOid());
+        }
+        //持久化 文件信息
+        this.fileImpl.fileUpload(filemanager);
+        //文件路径(全称)
+        outUrl = fileSaveUrl + newFileName;
+        //实体类转化为输出流
+        beanToFile(fileUrl, outUrl, po, userAccount);
+
+        return outUrl;
+    }
+
+    /**
+     * bean 转换文件
+     *
+     * @param inUrl
+     * @param outUrl
+     * @param po
+     * @param userAccount
+     */
+    public void beanToFile(String inUrl, String outUrl, ProjectOffer po, UserAccount userAccount) {
         try {
-            //创建文件
-            File f = new File(url);
+            //转换
+            HSSFWorkbook workbook = beanToHSSF(inUrl, po, userAccount);
+            //创建输出文件流
+            OutputStream outputStream = new FileOutputStream(outUrl);
+            //写入
+            workbook.write(outputStream);
+            //关闭流
+            outputStream.close();
+        } catch (Exception e) {
+
+        }
+    }
+
+
+    /**
+     * 解析实体类To文件
+     *
+     * @param po
+     * @param userAccount
+     * @return
+     */
+    public HSSFWorkbook beanToHSSF(String inUrl, ProjectOffer po, UserAccount userAccount) {
+        HSSFWorkbook workbook = null;
+        InputStream in = null;
+        try {
+            //获取文件
+            File f = new File(inUrl);
             //输入流
-            InputStream in = new FileInputStream(url);
+            in = new FileInputStream(inUrl);
             //poi格式
             POIFSFileSystem fs = new POIFSFileSystem(in);
             //新建hssf对象
-            HSSFWorkbook workbook = new HSSFWorkbook(fs);
+            workbook = new HSSFWorkbook(fs);
             //查看sheet0中
             HSSFSheet sheet = workbook.getSheetAt(0);
 
@@ -284,8 +340,6 @@ public class EmailService {
                         // 赋值每一行的样式 到 制定的行
                         PoiUtil.copyRow(workbook, sheet2.getRow(2),
                                 sheet.createRow(in1.intValue() + 2), true);
-
-                        // @//
                         // 获取新加入的行
                         HSSFRow row2 = sheet.getRow(in1.intValue() + 1);
 
@@ -377,61 +431,15 @@ public class EmailService {
                 }
             }
 
-            // 定义输出路径
-            String folder = "offerFiles";
-            String fileSaveUrl = FileUtil
-                    .createUserFiles(oid, basePath, folder);
-            String saveurl = oid + File.separator + folder + File.separator;
-
-            FileManager fm = this.fileImpl.selFileByOfferoid(oid, po.getOid());
-
-            String newFileName = null;
-
-            if (fm == null) {
-                newFileName = RandomUtil.getRandomFileName() + ".xls";
-                FileOutputStream out = new FileOutputStream(fileSaveUrl
-                        + newFileName);
-                //打印
-                System.out.println(fileSaveUrl + newFileName);
-                workbook.write(out);
-                out.close();
-                FileManager filemanager = new FileManager();
-                filemanager.setDate(new Date().toString());
-                filemanager.setName(po.getName() + ".xls");
-                filemanager.setOthername(newFileName);
-                filemanager.setBasepath(basePath);
-                filemanager.setUrl(saveurl);
-                filemanager.setUid(oid);
-                filemanager.setOfferOid(po.getOid());
-
-                this.fileImpl.fileUpload(filemanager);
-            } else {
-                newFileName = fm.getOthername();
-
-                FileOutputStream out = new FileOutputStream(fileSaveUrl
-                        + newFileName);
-
-                workbook.write(out);
-                out.close();
-
-                FileManager filemanager = new FileManager();
-
-                filemanager.setOid(fm.getOid());
-                filemanager.setDate(new Date().toString());
-                filemanager.setName(fm.getName());
-                filemanager.setOthername(newFileName);
-                filemanager.setUrl(fm.getUrl());
-                filemanager.setUid(fm.getUid());
-                filemanager.setBasepath(fm.getBasepath());
-                filemanager.setOfferOid(fm.getOfferOid());
-
-                this.fileImpl.fileUpload(filemanager);
-            }
-
-            return saveurl + newFileName;
         } catch (IOException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
+        } finally {
+            try {
+                in.close();
+            } catch (IOException e) {
+                // e.printStackTrace();
+            }
         }
-        return null;
+        return workbook;
     }
 }

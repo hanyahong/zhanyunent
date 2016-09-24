@@ -1,9 +1,6 @@
 package cc.zhanyun.util.excel;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -22,13 +19,38 @@ import org.w3c.dom.Document;
 import cc.zhanyun.util.RandomUtil;
 
 public class ExcelToHtml {
+    /**
+     * excel转换为HTMLString字符串
+     *
+     * @param excelPath
+     * @return
+     */
 
-    public static String excelToHtml(String excelPath, String htmlpath) {
-        String htmlName = null;
+    public static String excelToHtmlString(String excelPath) {
+        String content = null;
         try {
-            // 查找文件,输入流
-            InputStream input = new FileInputStream(excelPath);
-            HSSFWorkbook excelBook = new HSSFWorkbook(input);
+            InputStream inputStream = new FileInputStream(excelPath);
+            content = inputStreamToString(inputStream);
+            inputStream.close();
+        } catch (Exception e) {
+
+        }
+        return content;
+    }
+
+    /**
+     * 输入流转换为String
+     *
+     * @param input
+     * @return
+     */
+    public static String inputStreamToString(InputStream input) {
+        HSSFWorkbook excelBook = null;
+        ByteArrayOutputStream outStream = null;
+        String content = null;
+        try {
+            excelBook = new HSSFWorkbook(input);
+
             excelBook.removeSheetAt(1);
 
             ExcelToHtmlConverter excelToHtmlConverter = new ExcelToHtmlConverter(
@@ -45,10 +67,10 @@ public class ExcelToHtml {
 
             // 获取文档中图片
             List<HSSFPictureData> pics = excelBook.getAllPictures();
-            System.out.println(pics.size());
+            // System.out.println(pics.size());
             // 解析文档
             Document htmlDocument = excelToHtmlConverter.getDocument();
-            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+            outStream = new ByteArrayOutputStream();
             DOMSource domSource = new DOMSource(htmlDocument);
             StreamResult streamResult = new StreamResult(outStream);
             TransformerFactory tf = TransformerFactory.newInstance();
@@ -57,15 +79,35 @@ public class ExcelToHtml {
             serializer.setOutputProperty(OutputKeys.INDENT, "yes");
             serializer.setOutputProperty(OutputKeys.METHOD, "html");
             serializer.transform(domSource, streamResult);
+            content = new String(outStream.toByteArray());
+            //关闭流
             outStream.close();
+            input.close();
+        } catch (Exception e) {
+            //  e.printStackTrace();
+            content = null;
+        }
+        return content;
 
-            String content = new String(outStream.toByteArray());
-            htmlName = RandomUtil.getRandomFileName() + ".html";
+    }
+
+    /**
+     * excel转化html文件
+     *
+     * @param excelPath
+     * @param htmlpath
+     * @return
+     */
+    public static String excelToHtmlFile(String excelPath, String htmlpath) {
+
+        String content = excelToHtmlString(excelPath);
+        String htmlName = RandomUtil.getRandomFileName() + ".html";
+        try {
             FileUtils.writeStringToFile(new File(htmlpath, htmlName), content,
                     "utf-8");
-        } catch (Exception e) {
-            htmlName = null;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return htmlName;
+        return htmlpath + htmlName;
     }
 }

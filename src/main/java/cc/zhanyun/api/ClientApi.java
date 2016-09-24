@@ -107,7 +107,7 @@ public class ClientApi {
     @RequestMapping(value = {"/{num}/{size}"}, produces = {"application/json"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET})
     @ResponseBody
     public List<ClientVO> clientGet(@PathVariable("num") Integer num,
-                                    @PathVariable("num") Integer size) throws NotFoundException {
+                                    @PathVariable("size")  Integer size) throws NotFoundException {
 
         return this.service.selClientList(num, size);
     }

@@ -23,17 +23,35 @@ public abstract interface ProjectOfferService {
 
     public abstract ProjectOffer selProjectOfferOne(String paramString);
 
-    public abstract List<ProjectOfferVO> selProjectOfferList(Integer num ,Integer size);
+    public abstract List<ProjectOfferVO> selProjectOfferList(Integer num, Integer size);
 
     public abstract List<ProjectOfferVO> selProjectOfferOfStatus(
-            Integer paramInteger, Integer num ,Integer size);
+            Integer paramInteger, Integer num, Integer size);
 
     public abstract void updateProjectOfferStatus(OfferVO paramOfferVO);
 
     public abstract Info updateProjectImage(MultipartFile paramMultipartFile,
                                             String paramString);
 
+    /**
+     * 在线预览
+     *
+     * @param oid
+     * @return
+     */
     public abstract String selOfferOnline(String oid);
 
+    /**
+     * 在线预览,即看即删
+     *
+     * @return
+     */
+    public abstract String selOfferOnlineAndDelete(ProjectOffer projectOffer);
+
+    /**
+     * @param multipartFileList
+     * @param oid
+     * @return
+     */
     public abstract List<Info> batchUpdateProjectOfferImage(List<MultipartFile> multipartFileList, String oid);
 }

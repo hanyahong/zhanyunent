@@ -15,6 +15,24 @@ public class ClientmanagerList {
     private String email = null;
     private String uid;
     private Integer status;
+    private String wechat = null;
+    private String qq = null;
+
+    public String getQq() {
+        return qq;
+    }
+
+    public void setQq(String qq) {
+        this.qq = qq;
+    }
+
+    public String getWechat() {
+        return wechat;
+    }
+
+    public void setWechat(String wechat) {
+        this.wechat = wechat;
+    }
 
     public String getUid() {
         return uid;

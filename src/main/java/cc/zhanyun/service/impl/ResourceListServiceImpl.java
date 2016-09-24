@@ -7,8 +7,10 @@ import cc.zhanyun.model.resources.ResourceStatusVO;
 import cc.zhanyun.model.resources.ResourceTypeVO;
 import cc.zhanyun.model.resources.Resources;
 import cc.zhanyun.repository.impl.ResourceListRepoImpl;
+import cc.zhanyun.repository.impl.ResourcesRepoImpl;
 import cc.zhanyun.service.ResourceListService;
 import cc.zhanyun.service.ResourceService;
+import cc.zhanyun.util.RandomUtil;
 import cc.zhanyun.util.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -29,7 +31,7 @@ public class ResourceListServiceImpl implements ResourceListService {
     private ResourceListRepoImpl resourceListRepo;
     //注入资源操作层Bean
     @Autowired
-    private ResourceService resourceService;
+    private ResourcesRepoImpl resourcesRepo;
     //注入token工具Bean
     @Autowired
     private TokenUtil tokenUtil;
@@ -83,6 +85,7 @@ public class ResourceListServiceImpl implements ResourceListService {
     @Override
     public Info addResourceListService(List<ResourceList> resourceListList, String type) {
         String uid = tokenUtil.tokenToOid();
+        String oid = RandomUtil.getRandomFileName();
         Info info = new Info();
         try {
 
@@ -90,18 +93,19 @@ public class ResourceListServiceImpl implements ResourceListService {
             for (ResourceList r : resourceListList) {
 
                 Resources resources = new Resources();
-                resources.setClassification(r.getClassification());
-                resources.setSimplename(r.getSimplename());
-                resources.setUnit(r.getUnit());
+
                 resources.setUid(uid);
+                resources.setOid(oid);
+                resources.setName(r.getName());
+                resources.setClassification(type);
+                resources.setSimplename(r.getSimplename());
                 resources.setUnitprice(r.getUnitprice());
+                resources.setUnit(r.getUnit());
                 //新增资源
-                ResourceStatusVO rsvo = resourceService.addResource(resources);
-                //新增oid
-                String oid = rsvo.getOid();
+                resourcesRepo.addResources(resources);
+                //新增独立资源列表
                 r.setOid(oid);
                 r.setUid(uid);
-                //新增资源列表
                 resourceListRepo.addResourceList(r);
             }
             info.setStatus("y");
@@ -119,9 +123,57 @@ public class ResourceListServiceImpl implements ResourceListService {
      */
     @Override
     public Info addResourceListOne(ResourceList resourceList) {
+        String oid = RandomUtil.getRandomFileName();
+        String uid = tokenUtil.tokenToOid();
         Info info = new Info();
         try {
+            //单条增加资源
+            Resources resources = new Resources();
+            resources.setName(resourceList.getName());
+            resources.setUid(uid);
+            resources.setOid(oid);
+            resources.setSimplename(resourceList.getSimplename());
+            resources.setUnitprice(resourceList.getUnitprice());
+            resources.setUnit(resourceList.getUnit());
+            resources.setClassification(resourceList.getClassification());
+
+            resourcesRepo.addResources(resources);
+            //增加资源独立列表(电脑)
+            resourceList.setOid(oid);
+            resourceList.setUid(uid);
             resourceListRepo.addResourceList(resourceList);
+            //返回值
+            info.setStatus("y");
+        } catch (Exception e) {
+            info.setStatus("n");
+        }
+        return info;
+    }
+
+    /**
+     * 更新
+     *
+     * @param resourceList
+     * @return
+     */
+    @Override
+    public Info updateResourceListOne(ResourceList resourceList) {
+        Info info = new Info();
+        try {
+            //单条修改资源信息
+            Resources resources = new Resources();
+            resources.setOid(resourceList.getOid());
+            resources.setUid(tokenUtil.tokenToOid());
+            resources.setName(resourceList.getName());
+            resources.setSimplename(resourceList.getSimplename());
+            resources.setUnitprice(resourceList.getUnitprice());
+            resources.setUnit(resourceList.getUnit());
+            resources.setClassification(resourceList.getClassification());
+
+            resourcesRepo.updateResourceMain(resources);
+            //增加资源独立列表(电脑)
+            resourceListRepo.addResourceList(resourceList);
+            //返回值
             info.setStatus("y");
         } catch (Exception e) {
             info.setStatus("n");
@@ -161,39 +213,25 @@ public class ResourceListServiceImpl implements ResourceListService {
         //判断是否有新的变化 新增
         for (ResourceList r : resourceListList) {
             //如果不为空,有变化
-
             Info info = new Info();
             Resources resources = new Resources();
             resources.setOid(r.getOid());
             resources.setUid(tokenUtil.tokenToOid());
             resources.setUnit(r.getUnit());
             resources.setUnitprice(r.getUnitprice());
-            resources.setClassification(r.getClassification());
+            resources.setClassification(type);
             resources.setSimplename(r.getSimplename());
             resources.setName(r.getName());
             if (r.getStatus() == 1) {
-                //增加资源实体
-                ResourceStatusVO in = resourceService.addResource(resources);
-                if (in.getStatus().equals("添加成功")) {
-                    //增加资源独立列表
-                    r.setOid(in.getOid());
-                    r.setUid(tokenUtil.tokenToOid());
-                    resourceListRepo.addResourceList(r);
-                    //状态值返回
-                    info.setStatus("y");
-                } else {
-                    info.setStatus("n");
-                }
+                r.setStatus(3);
+                //增加资源
+                addResourceListOne(r);
             } else if (r.getStatus() == 2) {
-                //修改资源实体
-                Info in = resourceService.updateResourceMainInfo(resources);
-                //修改资源独立列表
-                resourceListRepo.addResourceList(r);
-                //设置返回值
-                info.setStatus("y");
-                //增加元素
-                infoList.add(info);
-            } else if (r.getStatus() == null) {
+                r.setStatus(3);
+                //更新资源
+                updateResourceListOne(r);
+            } else if (r.getStatus() == 3 || r.getStatus() == null) {
+                r.setStatus(3);
                 //增加资源独立列表
                 resourceListRepo.addResourceList(r);
                 //设置返回值
@@ -216,9 +254,10 @@ public class ResourceListServiceImpl implements ResourceListService {
     public Info updateType(ResourceTypeVO resourceTypeVO) {
         Info info = new Info();
         String uid = tokenUtil.tokenToOid();
-        Resources resources = resourceService.selResourceOne(resourceTypeVO.getOid());
+        //查询分类
+        Resources resources = resourcesRepo.selResourcesOne(resourceTypeVO.getOid());
         if (resources != null) {
-            resourceService.updateResourceType(resourceTypeVO.getNewType(), resourceTypeVO.getOid());
+            resourcesRepo.updateResourcTypes(resourceTypeVO.getNewType(), resourceTypeVO.getOid());
             info.setStatus("y");
         } else {
             info.setStatus("n");

@@ -1,11 +1,13 @@
 package cc.zhanyun.service.impl;
 
-import java.io.File;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import cc.zhanyun.model.PageableInfo;
 import cc.zhanyun.model.user.UserInfoVO;
+import cc.zhanyun.service.*;
+import cc.zhanyun.util.fileutil.StreamUtil;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,10 +33,6 @@ import cc.zhanyun.repository.impl.HtmlRespImpl;
 import cc.zhanyun.repository.impl.OfferRepoImpl;
 import cc.zhanyun.repository.impl.ProjectOfferRepoImpl;
 import cc.zhanyun.repository.impl.ProjectRepoImpl;
-import cc.zhanyun.service.EmailService;
-import cc.zhanyun.service.ImageService;
-import cc.zhanyun.service.ProjectOfferService;
-import cc.zhanyun.service.UserService;
 import cc.zhanyun.util.DateUtil;
 import cc.zhanyun.util.RandomUtil;
 import cc.zhanyun.util.TokenUtil;
@@ -63,12 +61,15 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
     private UserService userService;
     @Autowired
     private HtmlRespImpl htmlRespImpl;
+    @Autowired
+    private ProjectOfferFileModelService projectOfferFileModelService;
 
     public Info addProjectOfferOne(ProjectOffer po) {
         String othername = RandomUtil.getRandomFileName();
         String imageOid = RandomUtil.getRandomFileName();
         String oid = RandomUtil.getRandomFileName();
         String date = DateUtil.getCurDate();
+        String fileAndImages = RandomUtil.getRandomFileName();
 
         Offer offer = po.getOffer();
         List<Double> offertotal = new ArrayList();
@@ -116,22 +117,31 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
         po.setOthername(othername);
         po.getProject().setImageOid(imageOid);
         po.setUid(this.tokenutil.tokenToOid());
-        po.setOid(oid);
-
+        po.setOid(oid);//设置oid
+        po.getProject().setFileandimages(fileAndImages);//设置附件库
         po.setDate(date);
         Info info = new Info();
         try {
+            //添加项目报价
             this.pori.saveProOfferOne(po);
-
+            //添加项目
             this.pri.addProject(po.getProject());
-
+            //增加offer
             this.ori.addOffer(po.getOffer());
 
+            //实例一个图片库
             Image image = new Image();
             image.setOid(imageOid);
             image.setUid(this.tokenutil.tokenToOid());
-
             this.imageServiceImpl.saveImageService(image);
+
+            //实例一个附件库
+            Image image1 = new Image();
+            image1.setOid(fileAndImages);
+            image1.setUid(this.tokenutil.tokenToOid());
+            this.imageServiceImpl.saveImageService(image1);
+
+            //返回值设置
             info.setOid(oid);
             info.setStatus("添加成功");
         } catch (Exception e) {
@@ -250,11 +260,11 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
         return this.pori.selProOfferOne(oid);
     }
 
-    public List<ProjectOfferVO> selProjectOfferList(Integer num ,Integer size) {
+    public List<ProjectOfferVO> selProjectOfferList(Integer num, Integer size) {
         Pageable pageable = null;
 
         if (size != null) {
-            pageable = new PageRequest( num , size);
+            pageable = new PageRequest(num, size);
         }
         List<ProjectOffer> polist = this.pori.selProOfferList(this.tokenutil
                 .tokenToOid(), pageable);
@@ -274,10 +284,10 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
         return povolist;
     }
 
-    public List<ProjectOfferVO> selProjectOfferOfStatus(Integer status, Integer num ,Integer size) {
+    public List<ProjectOfferVO> selProjectOfferOfStatus(Integer status, Integer num, Integer size) {
         Pageable pageable = null;
         if (size != null) {
-            pageable = new PageRequest( num ,size);
+            pageable = new PageRequest(num, size);
         }
         List<ProjectOffer> polist = this.pori.selProOfferOfStatusList(status,
                 this.tokenutil.tokenToOid(), pageable);
@@ -341,7 +351,10 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
         ProjectOffer pOffer = selProjectOfferOne(oid);
         // 如果不为空,进行下一步
         if (pOffer != null) {
-            if (html == null) {
+            if (html != null && html.getHtmlname().length() != 0) {
+                // 如果数据库中已经有了,直接调用地址
+                return html.getUrl() + html.getHtmlname();
+            } else {
                 UserInfoVO uvo = userService.selUserInfo(uid);
                 UserAccount userAccount = new UserAccount();
                 userAccount.setName(uvo.getName());
@@ -355,12 +368,12 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
                         tokenutil.tokenToOid(), oid);
                 if (fm == null) {
                     // 如果没有,立刻生成文件
-                    emailService.MongodbToFile(null, pOffer, userAccount);
+                    emailService.mongoDBToFile(pOffer, userAccount);
                 }
                 // excel文件路径
                 String excelPath = basePath + fm.getUrl() + fm.getOthername();
                 // 转化为在在线html
-                String htmlName = ExcelToHtml.excelToHtml(excelPath, htmlpath);
+                String htmlName = ExcelToHtml.excelToHtmlFile(excelPath, htmlpath);
                 String htmlUrlString = uid + File.separator + folder
                         + File.separator;
                 // 持久化html页面信息
@@ -373,13 +386,49 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
                 // 返回在线地址
                 return uid + File.separator + folder + File.separator
                         + htmlName;
-
-            } else {
-                // 如果数据库中已经有了,直接调用地址
-                return html.getUrl() + html.getHtmlname();
             }
         }
         return null;
+    }
+
+    @Override
+    public String selOfferOnlineAndDelete(ProjectOffer projectOffer) {
+        //查询用户信息(解析使用)
+        UserInfoVO uvo = userService.selUserInfo(tokenutil.tokenToOid());
+        //传值
+        UserAccount userAccount = new UserAccount();
+        userAccount.setName(uvo.getName());
+        userAccount.setCompany(uvo.getCompany());
+        userAccount.setPhone(uvo.getPhone());
+        userAccount.setCompanyengname(uvo.getCompanyengname());
+        userAccount.setWebsite(uvo.getWebsite());
+        //查询用户默认报价单模板名称
+        String fileName = projectOfferFileModelService.selDefaultModel().getOthername();
+        if (fileName == null) {
+            fileName = Constant.SYSTEMDEFAULTMODEL;//系统缺省模板
+        }
+        //
+        String newName = RandomUtil.getRandomFileName();
+        //报价单下载模板地址
+        String inUrl = Constant.BASEPATH + Constant.OFFERMODELS + File.separator + fileName;
+        String content = null;
+        //转换Bean TO stream
+        try {
+            HSSFWorkbook workbook = emailService.beanToHSSF(inUrl, projectOffer, userAccount);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            workbook.write(out);
+            InputStream inputStream = new ByteArrayInputStream(out.toByteArray());
+            // 转换string
+            content = ExcelToHtml.inputStreamToString(inputStream);
+            //关闭流
+            out.close();
+            out.flush();
+            inputStream.close();
+        } catch (Exception e) {
+
+        }
+        //返回
+        return content;
     }
 
     /**

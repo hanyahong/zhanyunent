@@ -92,29 +92,8 @@ public class UserServiceImpl implements UserService {
                 in.setStatus("注册成功");
                 in.setOid(oid);
                 in.setToken(u.getToken());
-
-                ResourcesTypes type = new ResourcesTypes();
-                List<ResourcesTypeOne> rtList = new ArrayList();
-
-                type.setOid(oid);
-                type.setUid(oid);
-
-                ResourcesTypeOne one1 = new ResourcesTypeOne();
-                one1.setName("视频");
-                one1.setOid(RandomUtil.getRandomFileName());
-                ResourcesTypeOne one2 = new ResourcesTypeOne();
-                one2.setName("音频");
-                one2.setOid(RandomUtil.getRandomFileName());
-                ResourcesTypeOne one3 = new ResourcesTypeOne();
-                one3.setName("灯光");
-                one3.setOid(RandomUtil.getRandomFileName());
-
-                rtList.add(one1);
-                rtList.add(one2);
-                rtList.add(one3);
-
-                type.setResourcesoid(rtList);
-                this.resourceType.saveTypeOne(type);
+                //初始化默认资源分类
+                this.resourceType.saveTypeOfOneUser();
 
                 Image image = new Image();
                 image.setOid(imageOid);

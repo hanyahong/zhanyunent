@@ -46,7 +46,15 @@ public interface ResourceListService {
     public Info addResourceListOne(ResourceList resourceList);
 
     /**
-     * 单挑删除资源列表
+     * 单条修改资源列表
+     *
+     * @param resourceList
+     * @return
+     */
+    public Info updateResourceListOne(ResourceList resourceList);
+
+    /**
+     * 单条删除资源列表
      *
      * @param oid
      * @return

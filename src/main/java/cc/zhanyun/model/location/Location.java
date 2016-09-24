@@ -10,7 +10,7 @@ public class Location {
     private String oid;
     private String name;
     private String address;
-    private String contacts;
+    private String contacts;//场地联系人
     private String introduction;
     private String images;
     private List<Houses> houses = new ArrayList();

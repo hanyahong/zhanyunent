@@ -12,6 +12,32 @@ public class ProjectOfferDefaultFileModel {
     private String url;
     private String image;
     private String simage;
+    private String oldoid;
+    private String othername;
+
+    public String getOthername() {
+        return othername;
+    }
+
+    public void setOthername(String othername) {
+        this.othername = othername;
+    }
+
+    public String getOldoid() {
+        return oldoid;
+    }
+
+    public void setOldoid(String oldoid) {
+        this.oldoid = oldoid;
+    }
+
+    public String getSimage() {
+        return simage;
+    }
+
+    public void setSimage(String simage) {
+        this.simage = simage;
+    }
 
     public String getImage() {
         return image;

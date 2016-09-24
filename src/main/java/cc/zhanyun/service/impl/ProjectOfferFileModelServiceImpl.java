@@ -101,14 +101,22 @@ public class ProjectOfferFileModelServiceImpl implements ProjectOfferFileModelSe
         Info info = new Info();
         //查询模板库
         try {
+            //查询模板库
             ProjectOfferFileModel pro = selProjectOfferFileModel(projectOfferFileModel.getOid());
+            //创建载体对象
             ProjectOfferDefaultFileModel prode = new ProjectOfferDefaultFileModel();
-            prode.setOid(projectOfferFileModel.getOid());
-            prode.setName(projectOfferFileModel.getName());
+            prode.setOid(tokenUtil.tokenToOid());//暂时设置
             prode.setUid(tokenUtil.tokenToOid());
-            prode.setUrl(pro.getUrl());
-
+            prode.setName(projectOfferFileModel.getName());
+            prode.setUrl(projectOfferFileModel.getUrl());
+            prode.setImage(projectOfferFileModel.getImage());
+            prode.setSimage(projectOfferFileModel.getSimage());
+            prode.setOldoid(projectOfferFileModel.getOid());//设置原来的oid值,仅供判断用
+            prode.setOthername(projectOfferFileModel.getOthername());
+            //添加默认模板
             projectOfferDefaultFileModelRepo.addProjectOfferDefaultFileModel(prode);
+
+            //返回值设定
             info.setStatus("y");
         } catch (Exception e) {
             info.setStatus("n");

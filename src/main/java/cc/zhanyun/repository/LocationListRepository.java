@@ -16,5 +16,5 @@ public interface LocationListRepository extends MongoRepository<LocationList, St
      * @param uid
      * @return
      */
-    public List<LocationList> findByUid(String uid,Pageable pageable);
+    public List<LocationList> findByUid(String uid);
 }

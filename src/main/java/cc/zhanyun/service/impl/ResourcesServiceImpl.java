@@ -6,6 +6,7 @@ import cc.zhanyun.model.image.Image;
 import cc.zhanyun.model.resources.ResourceList;
 import cc.zhanyun.model.resources.ResourceStatusVO;
 import cc.zhanyun.model.resources.Resources;
+import cc.zhanyun.repository.impl.ResourceListRepoImpl;
 import cc.zhanyun.repository.impl.ResourcesRepoImpl;
 import cc.zhanyun.service.ImageService;
 import cc.zhanyun.service.ResourceService;
@@ -31,7 +32,7 @@ public class ResourcesServiceImpl
     @Autowired
     private ImageService imageService;
     @Autowired
-    private ResourceListServiceImpl resourceListService;
+    private ResourceListRepoImpl resourceListRepo;
 
     /**
      * 增加单个资源
@@ -64,8 +65,9 @@ public class ResourcesServiceImpl
             resourceList.setUnit(resources.getUnit());
             resourceList.setClassification(resources.getClassification());
             resourceList.setUnitprice(resources.getUnitprice());
+            resourceList.setStatus(3);//初始值为3
 
-            this.resourceListService.addResourceListOne(resourceList);
+            this.resourceListRepo.addResourceList(resourceList);
             //添加返回值
             rsvo.setOid(oid);
             rsvo.setStatus("添加成功");
@@ -97,7 +99,7 @@ public class ResourcesServiceImpl
             resourceList.setClassification(resources.getClassification());
             resourceList.setUnitprice(resources.getUnitprice());
             resourceList.setName(resources.getName());
-            this.resourceListService.addResourceListOne(resourceList);
+            this.resourceListRepo.addResourceList(resourceList);
             //返回值
             info.setStatus("添加成功");
         } catch (Exception e) {
@@ -132,7 +134,7 @@ public class ResourcesServiceImpl
             //删除资源
             this.resourceRepo.delResourcesOne(oid);
             //删除资源列表
-            this.resourceListService.delResourceListOne(oid);
+            this.resourceListRepo.delResourceListByOid(oid);
             //返回值
             info.setStatus("删除成功");
         } catch (Exception e) {

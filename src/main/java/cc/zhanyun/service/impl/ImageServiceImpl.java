@@ -50,6 +50,7 @@ public class ImageServiceImpl implements ImageService {
      */
     public Info saveImageOneService(MultipartFile file, String oid,
                                     String imagelocation) {
+        System.out.println(file.getOriginalFilename());
         //标志
         Info info = new Info();
         //基础路径

@@ -33,14 +33,14 @@ public class Project {
     private String imageOid;//项目图片库id
     private String description;//项目描述
     private String requirement;//项目要求 文字
-    private List<FileManager> file = new ArrayList<FileManager>();//项目附件
+    private String fileandimages;//项目,图片
 
-    public List<FileManager> getFile() {
-        return file;
+    public String getFileandimages() {
+        return fileandimages;
     }
 
-    public void setFile(List<FileManager> file) {
-        this.file = file;
+    public void setFileandimages(String fileandimages) {
+        this.fileandimages = fileandimages;
     }
 
     public String getRequirement() {

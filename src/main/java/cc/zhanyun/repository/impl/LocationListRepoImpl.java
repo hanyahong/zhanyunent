@@ -1,9 +1,16 @@
 package cc.zhanyun.repository.impl;
 
+import cc.zhanyun.model.location.Location;
 import cc.zhanyun.model.location.LocationList;
 import cc.zhanyun.repository.LocationListRepository;
+import com.mongodb.BasicDBObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.BasicUpdate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,6 +22,8 @@ import java.util.List;
 public class LocationListRepoImpl {
     @Autowired
     private LocationListRepository locationListRepository;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     /**
      * 增加场地独立列表
@@ -34,7 +43,16 @@ public class LocationListRepoImpl {
         locationListRepository.delete(oid);
     }
 
-    public List<LocationList> selLocationList(String uid, Pageable pageable) {
-        return locationListRepository.findByUid(uid, pageable);
+    /**
+     * 多条查询
+     *
+     * @param uid
+     * @return
+     */
+    public List<LocationList> selLocationList(String uid) {
+        return locationListRepository.findByUid(uid);
     }
+
+
+
 }

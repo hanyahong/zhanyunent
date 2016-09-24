@@ -16,7 +16,16 @@ public class FileManager {
     private String othername;
     private String uid;
     private String offerOid;
+    private String type;
 
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public String getBasepath() {
 

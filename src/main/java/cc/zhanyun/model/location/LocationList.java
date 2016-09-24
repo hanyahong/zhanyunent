@@ -15,6 +15,15 @@ public class LocationList {
     private String uid;
     private String phone;
     private Integer status;
+    private String contacts;//场地联系人
+
+    public String getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(String contacts) {
+        this.contacts = contacts;
+    }
 
     public String getPhone() {
         return phone;

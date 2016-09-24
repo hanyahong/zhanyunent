@@ -15,6 +15,15 @@ public class ProjectOfferFileModel {
     private String uid;//再时不使用
     private String image;
     private String simage;
+    private String othername;//系统名称
+
+    public String getOthername() {
+        return othername;
+    }
+
+    public void setOthername(String othername) {
+        this.othername = othername;
+    }
 
     public String getImage() {
         return image;

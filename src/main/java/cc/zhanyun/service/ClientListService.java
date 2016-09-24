@@ -23,6 +23,10 @@ public interface ClientListService {
      * 单条增加
      */
     public Info addClientListOne(ClientmanagerList clientmanagerList);
+    /**
+     * 单条修改
+     */
+    public Info updateClientListOne(ClientmanagerList clientmanagerList);
 
     /**
      * 单条删除
