@@ -152,9 +152,14 @@ public class PoiUtil {
         }
     }
 
-
-    public static void insertRow(HSSFSheet sheet, Integer rowIndex,
-                                 Integer rows) {
+    /**
+     * 插入空白行
+     *
+     * @param sheet
+     * @param rowIndex
+     * @param rows
+     */
+    public static void insertRow(HSSFSheet sheet, Integer rowIndex, Integer rows) {
         if (sheet.getRow(rowIndex.intValue()) != null) {
             int lastRowNo = sheet.getLastRowNum();
             sheet.shiftRows(rowIndex.intValue(), lastRowNo,

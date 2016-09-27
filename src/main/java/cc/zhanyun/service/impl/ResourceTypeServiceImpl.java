@@ -75,11 +75,11 @@ public class ResourceTypeServiceImpl
      */
     public Info delTypeOne(String oid) {
         Info info = new Info();
-        try {
-            //查询类库
-            this.typeRepo.delResourceType(oid, token.tokenToOid());
+        //查询类库
+        Integer in = this.typeRepo.delResourceType(oid, token.tokenToOid());
+        if (in == 1) {
             info.setStatus("y");
-        } catch (Exception e) {
+        } else {
             info.setStatus("n");
         }
         return info;

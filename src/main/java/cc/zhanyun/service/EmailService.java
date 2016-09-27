@@ -292,7 +292,7 @@ public class EmailService {
                             .getCell(s.getCell().intValue())
                             .setCellValue(userAccount.getWebsite());
                 } else if (s.getValue().equals(ExcelConstant.NUMID)) {//序号
-                    index = s.getRow();
+                    index = s.getRow();//表示位置
                 } else if (s.getValue().equals(OfferConstant.TOTALTAX)) {//含税总计
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
@@ -313,21 +313,19 @@ public class EmailService {
             }
 
             Integer in1 = Integer.valueOf(index.intValue() + 1);
-            System.out.print(in1);
+            // 标志位的下一行开始,循环(in1+1)
             List<Resourcetypes> resourceList = po.getOffer().getResourcetypes();
-
+            //分类数
             Integer count = Integer.valueOf(resourceList.size());
 
             if (count.intValue() != 0) {
                 for (int g = (resourceList.size() - 1); g >= 0; g--) {
                     Resourcetypes r = resourceList.get(g);
                     if (r.getSelectedresources().size() > 0) {
-                        // 插入空白行 3行
+                        // 插入空白行 2行
                         PoiUtil.insertRow(sheet, in1, 2);
                         // 获取sheet2中的样式
                         HSSFSheet sheet2 = workbook.getSheetAt(1);
-                        // 遍历sheet2中的三行数据
-
                         // 赋值每一行的样式 到 制定的行
                         PoiUtil.copyRow(workbook, sheet2.getRow(0),
                                 sheet.createRow(in1.intValue() + 1), true);
@@ -426,7 +424,7 @@ public class EmailService {
             }
 
         } catch (IOException e) {
-           // e.printStackTrace();
+            // e.printStackTrace();
         } finally {
             try {
                 in.close();

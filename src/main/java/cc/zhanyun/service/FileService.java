@@ -25,9 +25,9 @@ public abstract interface FileService {
      * 文件批量上传
      *
      * @param oid
-     * @param paramList
+     * @param files
      */
-    public abstract List<Info> batchUploadFiles(List<MultipartFile> paramList, String oid);
+    public abstract List<Info> batchUploadFiles(List<MultipartFile> files, String oid);
 
     /**
      * 单个文件下载

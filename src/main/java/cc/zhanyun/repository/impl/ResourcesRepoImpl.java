@@ -25,43 +25,85 @@ public class ResourcesRepoImpl {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    /**
+     * 增加资源
+     *
+     * @param resources
+     */
     public void addResources(Resources resources) {
         this.resourcesReponsitory.save(resources);
     }
 
-
+    /**
+     * 查询资源
+     *
+     * @param uid
+     * @param pageable
+     * @return
+     */
     public List<Resources> selResources(String uid, Pageable pageable) {
         List<Resources> rlist = this.resourcesReponsitory.findByUid(uid, pageable);
 
         return rlist;
     }
 
-
+    /**
+     * 查询所有资源
+     *
+     * @param pageable
+     * @return
+     */
     public Page<Resources> selResourcesAll(Pageable pageable) {
         return this.resourcesReponsitory.findAll(pageable);
     }
 
-
+    /**
+     * 查询某些资源
+     *
+     * @param uid
+     * @param pageable
+     * @return
+     */
     public List<Resources> selResourcesSome(String uid, Pageable pageable) {
         return this.resourcesReponsitory.findByUid(uid, pageable);
     }
 
-
+    /**
+     * 按分类查询资源
+     *
+     * @param classification
+     * @param uid
+     * @param pageable
+     * @return
+     */
     public List<Resources> selResourcesByType(String classification, String uid, Pageable pageable) {
         return this.resourcesReponsitory.findByClassificationAndUid(classification, uid, pageable);
     }
 
-
+    /**
+     * 查询单个资源
+     *
+     * @param oid
+     * @return
+     */
     public Resources selResourcesOne(String oid) {
         return (Resources) this.resourcesReponsitory.findOne(oid);
     }
 
-
+    /**
+     * 删除单个资源
+     *
+     * @param oid
+     */
     public void delResourcesOne(String oid) {
         this.resourcesReponsitory.delete(oid);
     }
 
-
+    /**
+     * 修改单个资源
+     *
+     * @param resources
+     */
     public void updateResourcesOne(Resources resources) {
         BasicDBObject basicDBObject = new BasicDBObject();
 
@@ -107,8 +149,6 @@ public class ResourcesRepoImpl {
         this.mongoTemplate.upsert(new Query(
                 Criteria.where("_id").is(resources.getOid())), update, "resources");
     }
-
-
 
 
     /**

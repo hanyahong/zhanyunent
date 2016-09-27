@@ -61,7 +61,7 @@ public class FileServiceImpl implements FileService {
         String othername = FileUtil.getOtherName(file);
         String saveFolder = FileUtil.createUserFolder(uid, url, folder);
         //上传文件
-        Integer in = FileUtil.uploadFile(file, saveFolder + File.separator + othername);
+        Integer in = FileUtil.uploadFile(file, saveFolder + othername);
         if (in == 1) {
             //上传成功,进行持久化操作
             FileLib fileLib = fileLibRepositry.selFileLib(oid);
@@ -70,7 +70,7 @@ public class FileServiceImpl implements FileService {
                 FileLib fileLib1 = new FileLib();
                 fileLib1.setOid(oid);
                 fileLib1.setUid(uid);
-                fileLibRepositry.addFileLib(fileLib);
+                fileLibRepositry.addFileLib(fileLib1);
             }
             //如果存在,正常操作,添加单条文件信息
             FileManager fileManager = new FileManager();
@@ -80,7 +80,7 @@ public class FileServiceImpl implements FileService {
             fileManager.setDate(DateUtil.getCurDate());
             fileManager.setName(file.getOriginalFilename());
             fileManager.setPostfix(FileUtil.getPostfix(file));
-            fileManager.setUrl(saveFolder + File.separator + othername);
+            fileManager.setUrl(saveFolder + othername);
             fileLibRepositry.addOneOfFileInFileLib(fileManager, oid);
             //返回值
             info.setStatus("y");
@@ -96,14 +96,15 @@ public class FileServiceImpl implements FileService {
     /**
      * 批量上传
      *
-     * @param paramList
+     * @param files
      */
     @Override
-    public List<Info> batchUploadFiles(List<MultipartFile> paramList, String oid) {
+    public List<Info> batchUploadFiles(List<MultipartFile> files, String oid) {
         List<Info> infoList = new ArrayList<Info>();
 
-        for (MultipartFile p : paramList) {
+        for (MultipartFile p : files) {
             Info in = new Info();
+            //上传
             Info info = uploadFile(p, oid);
             if (info.getStatus().equals("y")) {
                 in.setStatus("y");

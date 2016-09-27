@@ -60,7 +60,7 @@ public class FileLibRepositryImpl {
                     .and("fileManager._id").is(oid));
             Update update = new Update();
             update.unset("fileManager.$");
-            this.mongoTemplate.updateFirst(query, update, "fileLib");
+            this.mongoTemplate.updateFirst(query, update, FileLib.class);
             integer = 1;
         } catch (Exception e) {
             e.printStackTrace();
@@ -81,7 +81,7 @@ public class FileLibRepositryImpl {
             Query query = Query.query(Criteria.where("_id").is(oid));
             Update update = new Update();
             update.addToSet("fileManager", fileManager);
-            this.mongoTemplate.upsert(query, update, "fileLib");
+            this.mongoTemplate.upsert(query, update, FileLib.class);
         } catch (Exception e) {
             return Integer.valueOf(0);
         }

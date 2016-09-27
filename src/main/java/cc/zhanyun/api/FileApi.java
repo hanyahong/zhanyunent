@@ -20,12 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -54,29 +49,33 @@ public class FileApi {
      * @param file
      * @return
      */
-    @ApiOperation(value = "(文件操作)上传文件", notes = "上传文件(oid,文件库oid)", response = Void.class, responseContainer = "List")
+    @ApiOperation(value = "(文件操作)上传文件", notes = "上传文件(oid,文件库oid)", response = Info.class)
+    @ApiResponses({
+            @io.swagger.annotations.ApiResponse(code = 200, message = "获取成功", response = Info.class),
+            @io.swagger.annotations.ApiResponse(code = 500, message = "服务器响应失败", response = Error.class)})
     @RequestMapping(value = {"/filelab/{oid}"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
-    public Info handleFileUpload(
-            @ApiParam(value = "文件库oid", required = true) @PathVariable("oid") String oid
-            , @RequestBody MultipartFile file) {
+    public ResponseEntity<Info> handleFileLibUpload(
+            @ApiParam(value = "文件库oid", required = true) @PathVariable("oid") String oid,
+            MultipartFile file) {
+
         Info info = this.service.uploadFile(file, oid);
-        return info;
+        return new ResponseEntity(info, HttpStatus.OK);
     }
 
     /**
      * 批量上传文件
      *
      * @param oid
-     * @param file
+     * @param files
      * @return
      */
-    @ApiOperation(value = "(文件操作)批量上传文件", notes = "批量上传文件(oid,文件库oid)", response = Void.class, responseContainer = "List")
+    @ApiOperation(value = "(文件操作)批量上传文件", notes = "批量上传文件(文件库oid)", response = Info.class, responseContainer = "list")
     @RequestMapping(value = {"/filelab/batch/{oid}"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
-    public List<Info> handleBatchFileUpload(
+    public ResponseEntity<List<Info>> handleBatchFileUpload(
             @ApiParam(value = "文件库oid", required = true) @PathVariable("oid") String oid
-            , @RequestBody List<MultipartFile> file) {
-        List<Info> infoList = this.service.batchUploadFiles(file, oid);
-        return infoList;
+            ,@RequestParam("file") List<MultipartFile> files) {
+        List<Info> infoList = this.service.batchUploadFiles(files, oid);
+        return new ResponseEntity(infoList, HttpStatus.OK);
     }
 
     /**

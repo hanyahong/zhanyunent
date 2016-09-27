@@ -107,7 +107,7 @@ public class ClientApi {
     @RequestMapping(value = {"/{num}/{size}"}, produces = {"application/json"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET})
     @ResponseBody
     public List<ClientVO> clientGet(@PathVariable("num") Integer num,
-                                    @PathVariable("size")  Integer size) throws NotFoundException {
+                                    @PathVariable("size") Integer size) throws NotFoundException {
 
         return this.service.selClientList(num, size);
     }
@@ -141,7 +141,7 @@ public class ClientApi {
     @ApiOperation(value = "上传头像", notes = "上传头像", response = Info.class)
     @ApiResponses({
             @io.swagger.annotations.ApiResponse(code = 200, message = "获取成功", response = Info.class),
-            @io.swagger.annotations.ApiResponse(code = 500, message = "服务器响应失败", response = cc.zhanyun.model.Error.class)})
+            @io.swagger.annotations.ApiResponse(code = 500, message = "服务器响应失败", response = Error.class)})
     @RequestMapping(value = {"/upload/{oid}"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
     public ResponseEntity<Info> handleFileUpload(
             @ApiParam(value = "客户ID", required = true) @PathVariable("oid") String oid,

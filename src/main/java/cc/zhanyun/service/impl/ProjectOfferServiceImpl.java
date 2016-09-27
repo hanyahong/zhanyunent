@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import cc.zhanyun.model.ProOffInfo;
 import cc.zhanyun.model.user.UserInfoVO;
 import cc.zhanyun.service.*;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -63,7 +64,7 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
     @Autowired
     private ProjectOfferFileModelService projectOfferFileModelService;
 
-    public Info addProjectOfferOne(ProjectOffer po) {
+    public ProOffInfo addProjectOfferOne(ProjectOffer po) {
         String othername = RandomUtil.getRandomFileName();
         String imageOid = RandomUtil.getRandomFileName();
         String oid = RandomUtil.getRandomFileName();
@@ -78,7 +79,7 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
         po.setOid(oid);//设置oid
         po.getProject().setFileandimages(fileAndImages);//设置附件库
         po.setDate(date);
-        Info info = new Info();
+        ProOffInfo info = new ProOffInfo();
         try {
             //添加项目报价
             this.pori.saveProOfferOne(po);
@@ -102,6 +103,8 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
             //返回值设置
             info.setOid(oid);
             info.setStatus("添加成功");
+            info.setImageOid(imageOid);
+            info.setFileAndImages(fileAndImages);
         } catch (Exception e) {
             info.setStatus("添加失败");
         }

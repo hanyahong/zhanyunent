@@ -2,6 +2,7 @@ package cc.zhanyun.service;
 
 import cc.zhanyun.model.Info;
 import cc.zhanyun.model.PageableInfo;
+import cc.zhanyun.model.ProOffInfo;
 import cc.zhanyun.model.ProjectOffer;
 import cc.zhanyun.model.vo.OfferVO;
 import cc.zhanyun.model.vo.ProjectOfferVO;
@@ -15,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public abstract interface ProjectOfferService {
-    public abstract Info addProjectOfferOne(ProjectOffer paramProjectOffer);
+    public abstract ProOffInfo addProjectOfferOne(ProjectOffer paramProjectOffer);
 
     public abstract Info updateProjectOfferOne(ProjectOffer paramProjectOffer);
 

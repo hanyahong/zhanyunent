@@ -41,13 +41,13 @@ public class ProjectOfferApi {
      */
     @ApiOperation(value = "(项目报价)增加项目报价", notes = "单独增加项目报价 ", response = Void.class)
     @ApiResponses({
-            @io.swagger.annotations.ApiResponse(code = 200, message = "增加成功", response = Info.class),
+            @io.swagger.annotations.ApiResponse(code = 200, message = "增加成功", response = ProOffInfo.class),
             @io.swagger.annotations.ApiResponse(code = 500, message = "服务器无响应", response = Info.class)})
     @RequestMapping(value = {""}, produces = {"application/json"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
-    public ResponseEntity<Info> projectPost(
+    public ResponseEntity<ProOffInfo> projectPost(
             @ApiParam("项目报价属性") @RequestBody ProjectOffer po)
             throws NotFoundException {
-        Info info = this.service.addProjectOfferOne(po);
+        ProOffInfo info = this.service.addProjectOfferOne(po);
         return new ResponseEntity(info, HttpStatus.OK);
     }
 

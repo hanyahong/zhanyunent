@@ -46,16 +46,19 @@ public class ResourcesTypeRepoImpl {
      *
      * @param oid
      */
-    public void delResourceType(String oid, String uid) {
+    public Integer delResourceType(String oid, String uid) {
+        Integer integer = 0;
         try {
-            Query query = Query.query(Criteria.where("_id").is(uid)
+            Query query = new Query(Criteria.where("_id").is(uid)
                     .and("typelist._id").is(oid));
             Update update = new Update();
-            update.unset("resourcesTypes.$");
-            this.mongoTemplate.updateFirst(query, update, "resourcesTypes");
+            update.unset("typelist.$");
+            this.mongoTemplate.updateFirst(query, update, ResourcesTypes.class);
+            integer = 1;
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
         }
+        return integer;
     }
 
     /**
@@ -63,10 +66,13 @@ public class ResourcesTypeRepoImpl {
      */
     public Integer addResourceTypeOfOne(ResourcesTypeOne resourcesTypeOne, String uid) {
         try {
-            Query query = Query.query(Criteria.where("_id").is(uid));
+            //条件
+            Query query = new Query(Criteria.where("_id").is(uid));
+            //参数
             Update update = new Update();
             update.addToSet("typelist", resourcesTypeOne);
-            this.mongoTemplate.upsert(query, update, "resourcesTypes");
+            //增加
+            this.mongoTemplate.upsert(query, update, ResourcesTypes.class);
         } catch (Exception e) {
             return Integer.valueOf(0);
         }
@@ -80,19 +86,18 @@ public class ResourcesTypeRepoImpl {
         Integer in = 0;
         try {
             //查询条件
-            Query query = Query.query(Criteria.where("_id").is(uid).and("typelist._id").is(rtvo.getOid()));
+            Query query = new Query(Criteria.where("_id").is(uid).and("typelist._id").is(rtvo.getOid()));
             //更新值
-            BasicDBObject basicDBObject = new BasicDBObject();
-            basicDBObject.put("$set", new BasicDBObject("typelist.name", rtvo.getNewType()));
-            Update update = new BasicUpdate(basicDBObject);
-            this.mongoTemplate.upsert(query, update, "resourcesTypes");
+            Update update = new Update();
+            //修改的键
+            update.set("typelist.$.name", rtvo.getNewType());
+            this.mongoTemplate.upsert(query, update, ResourcesTypes.class);
             in = 1;
         } catch (Exception e) {
             //
             e.printStackTrace();
 
         }
-
         return in;
     }
 }
