@@ -108,12 +108,11 @@ public class ResourceTypeServiceImpl
     @Override
     public Info updateTypeOne(ResourceTypeVO resourcesVO) {
         Info info = new Info();
-        try {
-            //更新
-            this.typeRepo.updateResourceTypeOfOne(resourcesVO, token.tokenToOid());
+        //更新
+        Integer in = this.typeRepo.updateResourceTypeOfOne(resourcesVO, token.tokenToOid());
+        if (in == 1) {
             info.setStatus("y");
-        } catch (Exception e) {
-            //
+        } else {
             info.setStatus("n");
         }
         return info;

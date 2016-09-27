@@ -4,6 +4,7 @@ package cc.zhanyun.model.project;
 
 import cc.zhanyun.model.file.FileManager;
 import cc.zhanyun.model.location.Location;
+import org.springframework.data.annotation.Id;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
 
 public class Project {
 
-    @org.springframework.data.annotation.Id
+    @Id
     private String oid;//项目唯一id
     private String group;//项目分组
     private String name;//项目名称

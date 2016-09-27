@@ -1,4 +1,4 @@
-package cc.zhanyun.util;
+package cc.zhanyun.util.constant;
 
 public class Constant {
     //基础路径
@@ -17,4 +17,6 @@ public class Constant {
     public final static String TMPFOLDER = "tmp";
     //系统默认模板
     public final static String SYSTEMDEFAULTMODEL = BASEPATH + "offerlist.xls";
+    //文件库文件夹
+    public final static String FILELIB = "fileLib";
 }

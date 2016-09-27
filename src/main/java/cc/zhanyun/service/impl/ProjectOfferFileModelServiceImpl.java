@@ -31,11 +31,24 @@ public class ProjectOfferFileModelServiceImpl implements ProjectOfferFileModelSe
     @Autowired
     private ProjectOfferDefaultFileModelRepoImpl projectOfferDefaultFileModelRepo;
 
+    /**
+     * 以oid 单条查询模板
+     *
+     * @param oid
+     * @return
+     */
     @Override
     public ProjectOfferFileModel selProjectOfferFileModel(String oid) {
         return repo.selProjectOfferFileModelByOid(oid);
     }
 
+    /**
+     * 以uid 多条查询模板
+     *
+     * @param num
+     * @param size
+     * @return
+     */
     @Override
     public List<ProjectOfferFileModel> selProjectOfferFileModelList(Integer num, Integer size) {
 

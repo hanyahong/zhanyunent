@@ -14,6 +14,7 @@ public abstract interface ResourceTypeService {
     //查询分类
     public abstract List<ResourcesTypeOne> selTypeOfOneUser();
 
+
     //删除分类库中的一个
     public abstract Info delTypeOne(String oid);
 

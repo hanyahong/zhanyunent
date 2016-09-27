@@ -46,8 +46,8 @@ public class ProjectOfferModelRepoImpl {
     /**
      * 查询单条
      */
-    public ProjectOfferModel selProjectOfferModel(String oid) {
-        return projectOfferModelRepo.findOne(oid);
+    public ProjectOfferModel selProjectOfferModel(String oid, String uid) {
+        return projectOfferModelRepo.findByOidAndUid(oid, uid);
     }
 
     /**
@@ -71,7 +71,7 @@ public class ProjectOfferModelRepoImpl {
     /**
      * 以 模板状态查询
      */
-    public List<ProjectOfferModel> selProjectOfferModelByStatus(String status, Pageable pageable) {
-        return projectOfferModelRepo.findByStatus(status, pageable);
+    public List<ProjectOfferModel> selProjectOfferModelByStatus(String status, Pageable pageable, String uid) {
+        return projectOfferModelRepo.findByStatusAndUid(status, pageable, uid);
     }
 }

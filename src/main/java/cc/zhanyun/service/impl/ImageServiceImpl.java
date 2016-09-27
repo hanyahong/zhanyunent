@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import cc.zhanyun.model.PageableInfo;
-import cc.zhanyun.util.Constant;
+import cc.zhanyun.util.constant.Constant;
 import cc.zhanyun.util.ImageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,8 +66,8 @@ public class ImageServiceImpl implements ImageService {
         String othername2 = "s" + othername;
 
         //生成上传文件位置
-        String saveUrl = FileUtil.createUserFiles(uid, url, folder) + othername;
-        String saveUrl2 = FileUtil.createUserFiles(uid, url, folder) + othername2;
+        String saveUrl = FileUtil.createUserFolder(uid, url, folder) + othername;
+        String saveUrl2 = FileUtil.createUserFolder(uid, url, folder) + othername2;
         //上传文件
         Integer status = FileUtil.uploadFile(file, saveUrl);
         if (status.intValue() == 1) {

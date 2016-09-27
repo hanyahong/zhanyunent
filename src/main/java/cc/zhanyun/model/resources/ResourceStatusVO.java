@@ -1,6 +1,9 @@
 package cc.zhanyun.model.resources;
 
+import org.springframework.data.annotation.Id;
+
 public class ResourceStatusVO {
+    @Id
     private String oid;
     private String status;
     private String images;

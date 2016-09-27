@@ -6,7 +6,6 @@ import java.util.List;
 
 import cc.zhanyun.model.user.UserInfoVO;
 import cc.zhanyun.service.*;
-import cc.zhanyun.util.fileutil.StreamUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -14,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import cc.zhanyun.util.Constant;
+import cc.zhanyun.util.constant.Constant;
 import cc.zhanyun.model.Info;
 import cc.zhanyun.model.ProjectOffer;
 import cc.zhanyun.model.client.Clientmanager;
@@ -28,7 +27,7 @@ import cc.zhanyun.model.user.UserAccount;
 import cc.zhanyun.model.vo.OfferVO;
 import cc.zhanyun.model.vo.ProjectOfferVO;
 import cc.zhanyun.repository.impl.ClientRepoImpl;
-import cc.zhanyun.repository.impl.FileRepoImpl;
+import cc.zhanyun.repository.impl.OfferFileRepoImpl;
 import cc.zhanyun.repository.impl.HtmlRespImpl;
 import cc.zhanyun.repository.impl.OfferRepoImpl;
 import cc.zhanyun.repository.impl.ProjectOfferRepoImpl;
@@ -54,7 +53,7 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
     @Autowired
     private ImageService imageServiceImpl;
     @Autowired
-    private FileRepoImpl fileImpl;
+    private OfferFileRepoImpl fileImpl;
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -70,49 +69,8 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
         String oid = RandomUtil.getRandomFileName();
         String date = DateUtil.getCurDate();
         String fileAndImages = RandomUtil.getRandomFileName();
-
-        Offer offer = po.getOffer();
-        List<Double> offertotal = new ArrayList();
-        List<Resourcetypes> tlist = po.getOffer().getResourcetypes();
-
-        for (Resourcetypes t : tlist) {
-            List<Selectedresources> slist = t.getSelectedresources();
-
-            List<Double> dlist = new ArrayList();
-            for (Selectedresources s : slist) {
-                Integer amount = s.getAmount();
-                double unitprice = s.getUnitprice();
-
-                double total = amount.intValue() * unitprice;
-
-                s.setSubTotal(String.valueOf(total));
-
-                dlist.add(Double.valueOf(total));
-            }
-
-            double tt = 0.0D;
-            for (int i = 0; i < dlist.size(); i++) {
-                tt += ((Double) dlist.get(i)).doubleValue();
-            }
-
-            t.setTypetotal(Double.toString(tt));
-
-            offertotal.add(Double.valueOf(tt));
-        }
-        double at = 0.0D;
-
-        for (int j = 0; j < offertotal.size(); j++) {
-            at += ((Double) offertotal.get(j)).doubleValue();
-        }
-
-        po.getOffer().setTotalnotax(Double.toString(at));
-        //税金计算
-
-        double t = Double.valueOf(offer.getTax()).doubleValue();
-        offer.setTaxation(Double.toString(at / ((1 - t / 100)) * t));
-
-        double totaltax = at + t * at;
-        offer.setTotaltax(Double.toString(totaltax));
+        //计算相关值
+        offerMath(po);
 
         po.setOthername(othername);
         po.getProject().setImageOid(imageOid);
@@ -173,49 +131,7 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
 
             String date = DateUtil.getCurDate();
             po.setDate(date);
-            Offer offer = po.getOffer();
-            List<Double> offertotal = new ArrayList<Double>();
-            List<Resourcetypes> tlist = po.getOffer().getResourcetypes();
-            //循环资源类型
-            for (Resourcetypes t : tlist) {
-                List<Selectedresources> slist = t.getSelectedresources();
-
-                List<Double> dlist = new ArrayList<Double>();
-                //循环资源
-                for (Selectedresources s : slist) {
-                    Integer amount = s.getAmount();
-                    double unitprice = s.getUnitprice();
-
-                    double total = amount.intValue() * unitprice;
-
-                    s.setSubTotal(String.valueOf(total));
-
-                    dlist.add(Double.valueOf(total));
-                }
-                //
-                double tt = 0.0D;
-                for (int i = 0; i < dlist.size(); i++) {
-                    tt += ((Double) dlist.get(i)).doubleValue();
-                }
-
-                t.setTypetotal(Double.toString(tt));
-
-                offertotal.add(Double.valueOf(tt));
-            }
-            double at = 0.0D;
-
-            for (int j = 0; j < offertotal.size(); j++) {
-                at += ((Double) offertotal.get(j)).doubleValue();
-            }
-
-            po.getOffer().setTotalnotax(Double.toString(at));
-
-            double t = Double.valueOf(offer.getTax()).doubleValue();
-            offer.setTaxation(Double.toString(t * at));
-
-            double totaltax = at + t * at;
-            offer.setTotaltax(Double.toString(totaltax));
-            po.setUid(this.tokenutil.tokenToOid());
+            offerMath(po);
 
             try {
                 this.pori.saveProOfferOne(po);
@@ -344,7 +260,7 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
         String basePath = Constant.BASEPATH;
         String uid = tokenutil.tokenToOid();
         String folder = "html";
-        String htmlpath = FileUtil.createUserFiles(uid, basePath, folder);
+        String htmlpath = FileUtil.createUserFolder(uid, basePath, folder);
         Html html = htmlRespImpl.selHtmlByOfferOid(oid);
 
         // 查询报价单
@@ -392,7 +308,12 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
     }
 
     @Override
-    public String selOfferOnlineAndDelete(ProjectOffer projectOffer) {
+    public String selOfferOnlineAndDelete(ProjectOffer po) {
+        String contant = null;
+        //计算相关数据
+        String date = DateUtil.getCurDate();
+        po.setDate(date);
+        offerMath(po);
         //查询用户信息(解析使用)
         UserInfoVO uvo = userService.selUserInfo(tokenutil.tokenToOid());
         //传值
@@ -402,6 +323,7 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
         userAccount.setPhone(uvo.getPhone());
         userAccount.setCompanyengname(uvo.getCompanyengname());
         userAccount.setWebsite(uvo.getWebsite());
+
         //查询用户默认报价单模板名称
         String fileName = projectOfferFileModelService.selDefaultModel().getOthername();
         if (fileName == null) {
@@ -414,12 +336,12 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
         String content = null;
         //转换Bean TO stream
         try {
-            HSSFWorkbook workbook = emailService.beanToHSSF(inUrl, projectOffer, userAccount);
+            HSSFWorkbook workbook = emailService.beanToHSSF(inUrl, po, userAccount);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
             InputStream inputStream = new ByteArrayInputStream(out.toByteArray());
-            // 转换string
-            content = ExcelToHtml.inputStreamToString(inputStream);
+            //转换HTML
+            contant = ExcelToHtml.inputStreamToString(inputStream);
             //关闭流
             out.close();
             out.flush();
@@ -428,7 +350,7 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
 
         }
         //返回
-        return content;
+        return contant;
     }
 
     /**
@@ -446,5 +368,52 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
             ilist.add(in);
         }
         return ilist;
+    }
+
+
+    public void offerMath(ProjectOffer po) {
+        po.setDate(DateUtil.getCurDate());
+        po.getProject().setCreatetime(DateUtil.getCurDate());
+        po.getOffer().setUpdatedtime(DateUtil.getCurDate());
+        Offer offer = po.getOffer();
+        List<Double> offertotal = new ArrayList();
+        List<Resourcetypes> tlist = po.getOffer().getResourcetypes();
+
+        for (Resourcetypes t : tlist) {
+            List<Selectedresources> slist = t.getSelectedresources();
+
+            List<Double> dlist = new ArrayList();
+            for (Selectedresources s : slist) {
+                Integer amount = s.getAmount();
+                Integer unitprice = s.getUnitprice();
+
+                double total = amount.intValue() * unitprice * s.getDays();
+
+                s.setSubTotal(String.valueOf(Math.round(total)));
+
+                dlist.add(Double.valueOf(total));
+            }
+
+            double tt = 0.0D;
+            for (int i = 0; i < dlist.size(); i++) {
+                tt += ((Double) dlist.get(i)).doubleValue();
+            }
+
+            t.setTypetotal(String.valueOf(Math.round(tt)));
+
+            offertotal.add(Double.valueOf(tt));
+        }
+        double at = 0.0D;
+
+        for (int j = 0; j < offertotal.size(); j++) {
+            at += ((Double) offertotal.get(j)).doubleValue();
+        }
+        po.getOffer().setTotalnotax(String.valueOf(Math.round(at)));
+        //税金计算
+
+        double t = Double.valueOf(offer.getTax()).doubleValue();
+        offer.setTaxation(String.valueOf((Math.round((at / ((1 - t / 100)) * t)) / 100)));
+        double totaltax = at + t * at;
+        offer.setTotaltax(String.valueOf(Math.round(totaltax)));
     }
 }

@@ -15,7 +15,6 @@ public class ResourcesParameter {
 
     @Id
     private String oid = null;
-
     private String name = null;
     private String value = null;
 

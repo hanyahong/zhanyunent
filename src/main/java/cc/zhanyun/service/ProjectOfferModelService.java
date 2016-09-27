@@ -13,16 +13,21 @@ import java.util.List;
  */
 @Service
 public interface ProjectOfferModelService {
-
+    //增加
     public Info addProjectOfferModel(ProjectOfferModel projectOfferModel);
 
+    //删除
     public Info delProjectOfferModel(String oid);
 
-    public List<ProjectOfferModel> selProjectOfferModelList(Integer num ,Integer size);
+    //查询列表
+    public List<ProjectOfferModel> selProjectOfferModelList(Integer num, Integer size);
 
+    //单条查询
     public ProjectOfferModel selProjectOfferModel(String oid);
 
-    public List<ProjectOfferModel> selProjectOfferModelListByStatus(String status, Integer num ,Integer size);
+    //状态查询
+    public List<ProjectOfferModel> selProjectOfferModelListByStatus(String status, Integer num, Integer size);
 
+    //更新
     public Info updateProjectOfferModelStatus(Info info);
 }

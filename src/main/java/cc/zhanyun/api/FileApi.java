@@ -47,18 +47,71 @@ public class FileApi {
     @Autowired
     private ImageService imageService;
 
-    @ApiOperation(value = "上传文件(模板)", notes = "上传文件(模板)", response = Void.class, responseContainer = "List")
+    /**
+     * 上传上传
+     *
+     * @param oid
+     * @param file
+     * @return
+     */
+    @ApiOperation(value = "(文件操作)上传文件", notes = "上传文件(oid,文件库oid)", response = Void.class, responseContainer = "List")
+    @RequestMapping(value = {"/filelab/{oid}"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
+    public Info handleFileUpload(
+            @ApiParam(value = "文件库oid", required = true) @PathVariable("oid") String oid
+            , @RequestBody MultipartFile file) {
+        Info info = this.service.uploadFile(file, oid);
+        return info;
+    }
+
+    /**
+     * 批量上传文件
+     *
+     * @param oid
+     * @param file
+     * @return
+     */
+    @ApiOperation(value = "(文件操作)批量上传文件", notes = "批量上传文件(oid,文件库oid)", response = Void.class, responseContainer = "List")
+    @RequestMapping(value = {"/filelab/batch/{oid}"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
+    public List<Info> handleBatchFileUpload(
+            @ApiParam(value = "文件库oid", required = true) @PathVariable("oid") String oid
+            , @RequestBody List<MultipartFile> file) {
+        List<Info> infoList = this.service.batchUploadFiles(file, oid);
+        return infoList;
+    }
+
+    /**
+     * 下载文件库文件
+     *
+     * @param libOid
+     * @param fileOid
+     * @return
+     * @throws IOException
+     */
+    @ApiOperation(value = "(文件操作)文件下载", notes = "(文件库)文件下载", response = Void.class)
     @ApiResponses({
             @io.swagger.annotations.ApiResponse(code = 200, message = "获取成功", response = Void.class),
             @io.swagger.annotations.ApiResponse(code = 500, message = "服务器响应失败", response = cc.zhanyun.model.Error.class)})
-    @RequestMapping(value = {"/upload"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
-    public String handleFileUpload(
-            @ApiParam(value = "Token", required = true) @RequestHeader("token") String token,
-            MultipartFile file) {
-        String info = this.service.uploadFile(file);
+    @RequestMapping(value = {"/filelab/{libOid}/{fileOid}"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET})
+    public ResponseEntity<InputStreamResource> downloadFileOfFileLib(
+            @ApiParam(value = "文件库ID", required = true) @PathVariable("libOid") String libOid,
+            @ApiParam(value = "文件ID", required = true) @PathVariable("fileOid") String fileOid)
+            throws IOException {
 
-        return info;
+        FileSystemResource file = new FileSystemResource(this.service.downloadFileOfFileLib(libOid, fileOid));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        headers.add("Content-Disposition", String.format("attachment; filename=\"%s\"", new Object[]{file.getFilename()}));
+        headers.add("Pragma", "no-cache");
+        headers.add("Expires", "0");
+
+        return (ResponseEntity
+                .ok()
+                .headers(headers))
+                .contentLength(file.contentLength())
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(new InputStreamResource(file.getInputStream()));
     }
+
 
     /**
      * 下载报价单模板
@@ -67,7 +120,7 @@ public class FileApi {
      * @return
      * @throws IOException
      */
-    @ApiOperation(value = "下载文件（报价单）", notes = "下载文件（报价单）", response = Void.class)
+    @ApiOperation(value = "(报价单库)下载报价单", notes = "下载文件报价单", response = Void.class)
     @ApiResponses({
             @io.swagger.annotations.ApiResponse(code = 200, message = "获取成功", response = Void.class),
             @io.swagger.annotations.ApiResponse(code = 500, message = "服务器响应失败", response = cc.zhanyun.model.Error.class)})
@@ -75,87 +128,67 @@ public class FileApi {
     public ResponseEntity<InputStreamResource> downloadFile(
             @ApiParam(value = "报价单ID", required = true) @PathVariable("oid") @RequestBody String oid)
             throws IOException {
-        FileSystemResource file = this.service.downloadFile(oid);
-        HttpHeaders headers = new HttpHeaders();
 
+        FileSystemResource file = new FileSystemResource(this.service.downloadFile(oid));
+        HttpHeaders headers = new HttpHeaders();
         headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-        headers.add("Content-Disposition", String.format(
-                "attachment; filename=\"%s\"",
-                new Object[]{file.getFilename()}));
+        headers.add("Content-Disposition", String.format("attachment; filename=\"%s\"", new Object[]{file.getFilename()}));
         headers.add("Pragma", "no-cache");
         headers.add("Expires", "0");
 
-        return ((ResponseEntity.BodyBuilder) ResponseEntity.ok().headers(
-                headers))
+        return (ResponseEntity
+                .ok()
+                .headers(headers))
                 .contentLength(file.contentLength())
-                .contentType(
-                        MediaType.parseMediaType("application/octet-stream"))
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
                 .body(new InputStreamResource(file.getInputStream()));
     }
 
-    @ApiOperation(value = "批量上传文件", notes = "批量上传文件", response = Void.class, responseContainer = "List")
+    /**
+     * 文件库删除
+     *
+     * @param libOid
+     * @param fileOid
+     * @return
+     * @throws NotFoundException
+     */
+    @ApiOperation(value = "(文件操作)删除文件", notes = "删除文件", response = Void.class)
     @ApiResponses({
-            @io.swagger.annotations.ApiResponse(code = 200, message = "获取成功", response = Void.class),
-            @io.swagger.annotations.ApiResponse(code = 500, message = "服务器响应失败", response = cc.zhanyun.model.Error.class)})
-    @RequestMapping(value = {"/batch/upload"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
-    @ResponseBody
-    public String handleFileUpload(
-            @ApiParam(value = "Token", required = true) @RequestHeader("token") String token,
-            HttpServletRequest request) {
-        List<MultipartFile> files = ((MultipartHttpServletRequest) request)
-                .getFiles("file");
-
-        for (int i = 0; i < files.size(); i++) {
-            MultipartFile file = (MultipartFile) files.get(i);
-            String name = file.getOriginalFilename();
-            String url = "F:/";
-            if (!file.isEmpty()) {
-                try {
-                    byte[] bytes = file.getBytes();
-                    BufferedOutputStream stream = new BufferedOutputStream(
-                            new FileOutputStream(new File(url + name + i)));
-
-                    stream.write(bytes);
-                    stream.close();
-                } catch (Exception e) {
-                    return "You failed to upload " + name + " => "
-                            + e.getMessage();
-                }
-            } else {
-                return "You failed to upload " + name
-                        + " because the file was empty.";
-            }
-        }
-
-        return "upload successful";
+            @io.swagger.annotations.ApiResponse(code = 200, message = "删除成功", response = Void.class),
+            @io.swagger.annotations.ApiResponse(code = 500, message = "服务器响应错误", response = Void.class)})
+    @RequestMapping(value = {"/filelab/{libOid}/{fileOid}"}, produces = {"application/json"}, method = {org.springframework.web.bind.annotation.RequestMethod.DELETE})
+    public ResponseEntity<Info> oneOfFileLibDelete(
+            @ApiParam(value = "文件库ID", required = true) @PathVariable("libOid") String libOid,
+            @ApiParam(value = "文件ID", required = true) @PathVariable("fileOid") String fileOid)
+            throws NotFoundException {
+        Info info = this.service.delFileOfFileLib(libOid, fileOid);
+        return new ResponseEntity(info, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "app更新", notes = "app更新", response = Void.class)
+    /**
+     * app更新
+     *
+     * @return
+     * @throws IOException
+     */
+    @ApiOperation(value = "(app库)app更新", notes = "app更新", response = Void.class)
     @ApiResponses({
             @io.swagger.annotations.ApiResponse(code = 200, message = "获取成功", response = Void.class),
             @io.swagger.annotations.ApiResponse(code = 500, message = "服务器响应失败", response = cc.zhanyun.model.Error.class)})
     @RequestMapping(value = {"/download/app"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET})
     public ResponseEntity<InputStreamResource> downloadAppFile()
             throws IOException {
-        FileSystemResource file = this.service.downloadFile("dddd");
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-        headers.add("Content-Disposition", String.format(
-                "attachment; filename=\"%s\"",
-                new Object[]{file.getFilename()}));
-        headers.add("Pragma", "no-cache");
-        headers.add("Expires", "0");
-
-        return ((ResponseEntity.BodyBuilder) ResponseEntity.ok().headers(
-                headers))
-                .contentLength(file.contentLength())
-                .contentType(
-                        MediaType.parseMediaType("application/octet-stream"))
-                .body(new InputStreamResource(file.getInputStream()));
+        return null;
     }
 
-    @ApiOperation(value = "查询照片库", notes = "查询照片库", response = Image.class)
+    /**
+     * 查询图片库
+     *
+     * @param oid
+     * @return
+     * @throws IOException
+     */
+    @ApiOperation(value = "(图片库)查询照片库", notes = "查询照片库", response = Image.class)
     @ApiResponses({
             @io.swagger.annotations.ApiResponse(code = 200, message = "获取成功", response = Image.class),
             @io.swagger.annotations.ApiResponse(code = 500, message = "服务器响应失败", response = cc.zhanyun.model.Error.class)})
@@ -166,7 +199,15 @@ public class FileApi {
         return this.imageService.selImagesByOid(oid);
     }
 
-    @ApiOperation(value = "删除图片", notes = "删除图片", response = Void.class)
+    /**
+     * 图片库删除
+     *
+     * @param oid
+     * @param ioid
+     * @return
+     * @throws NotFoundException
+     */
+    @ApiOperation(value = "(图片库)删除图片", notes = "删除图片", response = Void.class)
     @ApiResponses({
             @io.swagger.annotations.ApiResponse(code = 200, message = "删除成功", response = Void.class),
             @io.swagger.annotations.ApiResponse(code = 500, message = "服务器响应错误", response = Void.class)})

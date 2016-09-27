@@ -8,6 +8,7 @@ import java.util.List;
 import javax.mail.internet.MimeMessage;
 
 import cc.zhanyun.model.*;
+import cc.zhanyun.util.constant.*;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -19,12 +20,11 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import cc.zhanyun.util.Constant;
 import cc.zhanyun.model.file.FileManager;
 import cc.zhanyun.model.offer.Resourcetypes;
 import cc.zhanyun.model.offer.Selectedresources;
 import cc.zhanyun.model.user.UserAccount;
-import cc.zhanyun.repository.impl.FileRepoImpl;
+import cc.zhanyun.repository.impl.OfferFileRepoImpl;
 import cc.zhanyun.repository.impl.UserRepoImpl;
 import cc.zhanyun.util.RandomUtil;
 import cc.zhanyun.util.TokenUtil;
@@ -42,7 +42,7 @@ public class EmailService {
     @Autowired
     private ProjectOfferService pos;
     @Autowired
-    private FileRepoImpl fileImpl;
+    private OfferFileRepoImpl fileImpl;
     @Autowired
     private ProjectOfferFileModelService projectOfferFileModelService;
 
@@ -116,7 +116,7 @@ public class EmailService {
         //模板路径
         String outUrl = null;
         //基本绝对路径(系统操作使用)
-        String fileSaveUrl = FileUtil.createUserFiles(oid, Constant.BASEPATH, Constant.OFFERFILENAME);
+        String fileSaveUrl = FileUtil.createUserFolder(oid, Constant.BASEPATH, Constant.OFFERFILENAME);
         //相对路径(远程转移时使用)
         String saveurl = oid + File.separator + Constant.OFFERFILENAME + File.separator;
         //查询文件库中是否生成过
@@ -144,7 +144,7 @@ public class EmailService {
             filemanager.setOfferOid(fm.getOfferOid());
         }
         //持久化 文件信息
-        this.fileImpl.fileUpload(filemanager);
+        this.fileImpl.addFileInfoOne(filemanager);
         //文件路径(全称)
         outUrl = fileSaveUrl + newFileName;
         //实体类转化为输出流
@@ -216,102 +216,96 @@ public class EmailService {
 
             Integer index = Integer.valueOf(0);
             for (Status s : slist) {
-
-                if (s.getValue().equals("offerName")) {
-                    sheet.getRow(s.getRow().intValue())
-                            .getCell(s.getCell().intValue())
+                if (s.getValue().equals(UserConstant.COMPANY)) {
+                    sheet.getRow(s.getRow().intValue()).getCell(s.getCell().intValue())
                             .setCellValue(userAccount.getCompany() + "报价单");
-                } else if (s.getValue().equals("clientCompany")) {
-
+                } else if (s.getValue().equals(UserConstant.PHONE)) {//&&&&&用户电话
                     sheet.getRow(s.getRow().intValue())
-                            .getCell(s.getCell().intValue())
-                            .setCellValue(
-                                    po.getOffer().getClient().getCompany());
-                } else if (s.getValue().equals("clientName")) {
+                            .getCell(s.getCell().intValue()).setCellValue(userAccount.getPhone());
+                } else if (s.getValue().equals(UserConstant.NAME)) {//&&&&&用户姓名
                     sheet.getRow(s.getRow().intValue())
-                            .getCell(s.getCell().intValue())
-                            .setCellValue(po.getOffer().getClient().getName());
-                } else if (s.getValue().equals("userPhone")) {
+                            .getCell(s.getCell().intValue()).setCellValue(userAccount.getName());
+                } else if (s.getValue().equals(UserConstant.COMPANY)) {//&&&&&用户公司
                     sheet.getRow(s.getRow().intValue())
-                            .getCell(s.getCell().intValue())
-                            .setCellValue(userAccount.getPhone());
-                } else if (s.getValue().equals("projectAddress")) {
-
+                            .getCell(s.getCell().intValue()).setCellValue(userAccount.getCompany());
+                } else if (s.getValue().equals(ClientConstant.NAME)) {//客户姓名
                     sheet.getRow(s.getRow().intValue())
-                            .getCell(s.getCell().intValue())
-                            .setCellValue(
-                                    po.getProject().getLocation().getAddress());
-                } else if (s.getValue().equals("projectName")) {
+                            .getCell(s.getCell().intValue()).setCellValue(po.getOffer().getClient().getName());
+                } else if (s.getValue().equals(ClientConstant.TEL)) {//客户电话
                     sheet.getRow(s.getRow().intValue())
-                            .getCell(s.getCell().intValue())
-                            .setCellValue(po.getName());
-                } else if (s.getValue().equals("preparePlanTime")) {
+                            .getCell(s.getCell().intValue()).setCellValue(po.getOffer().getClient().getTel());
+                } else if (s.getValue().equals(ClientConstant.EMAIL)) {//客户邮箱
                     sheet.getRow(s.getRow().intValue())
-                            .getCell(s.getCell().intValue())
-                            .setCellValue(po.getProject().getPrepareplantime());
-                } else if (s.getValue().equals("startPlanTime")) {
+                            .getCell(s.getCell().intValue()).setCellValue(po.getOffer().getClient().getEmail());
+                } else if (s.getValue().equals(ClientConstant.COMPANY)) {//客户公司
+                    sheet.getRow(s.getRow().intValue())
+                            .getCell(s.getCell().intValue()).setCellValue(po.getOffer().getClient().getCompany());
+                } else if (s.getValue().equals(ClientConstant.ADDRESS)) {//客户地址
+                    sheet.getRow(s.getRow().intValue())
+                            .getCell(s.getCell().intValue()).setCellValue(po.getOffer().getClient().getAddress());
+                } else if (s.getValue().equals(ClientConstant.OID)) {//客户编号
+                    sheet.getRow(s.getRow().intValue())
+                            .getCell(s.getCell().intValue()).setCellValue(po.getOffer().getClient().getOid());
+                } else if (s.getValue().equals(ClientConstant.WEBSITE)) {//客户网址
+                    sheet.getRow(s.getRow().intValue())
+                            .getCell(s.getCell().intValue()).setCellValue(po.getOffer().getClient().getWebsite());
+                } else if (s.getValue().equals(LocationConstant.ADDRESS)) {//场地地址
+                    sheet.getRow(s.getRow().intValue())
+                            .getCell(s.getCell().intValue()).setCellValue(
+                            po.getProject().getLocation().getAddress());
+                } else if (s.getValue().equals(ProjectOfferConstant.NAME)) {//项目报价名称
+                    sheet.getRow(s.getRow().intValue())
+                            .getCell(s.getCell().intValue()).setCellValue(po.getName());
+                } else if (s.getValue().equals(ProjectConstant.PREPAREPLANTIME)) {//项目预计进场时间
+                    sheet.getRow(s.getRow().intValue())
+                            .getCell(s.getCell().intValue()).setCellValue(po.getProject().getPrepareplantime());
+                } else if (s.getValue().equals(ProjectConstant.STARTPLANTIME)) {//项目预计开始时间
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
                             .setCellValue(po.getProject().getStartplantime());
-                } else if (s.getValue().equals("leavePlanTime")) {
+                } else if (s.getValue().equals(ProjectConstant.LEAVEPLANTIME)) {//项目预计撤离时间
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
                             .setCellValue(po.getProject().getLeaveplantime());
-                } else if (s.getValue().equals("projectOid")) {
+                } else if (s.getValue().equals(ProjectOfferConstant.OID)) {//项目报价单编号
                     sheet.getRow(s.getRow())
                             .getCell(s.getCell().intValue())
                             .setCellValue(po.getOid());
-                } else if (s.getValue().equals("offerDate")) {
+                } else if (s.getValue().equals(OfferConstant.UPDATETIME)) {//报价更新时间
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
-                            .setCellValue(po.getProject().getCreatetime());
-                } else if (s.getValue().equals("userName")) {
-                    sheet.getRow(s.getRow().intValue())
-                            .getCell(s.getCell().intValue())
-                            .setCellValue(userAccount.getName());
-                } else if (s.getValue().equals("userCompany")) {
-                    sheet.getRow(s.getRow().intValue())
-                            .getCell(s.getCell().intValue())
-                            .setCellValue(userAccount.getCompany());
-                } else if (s.getValue().equals("userPhone")) {
-                    sheet.getRow(s.getRow().intValue())
-                            .getCell(s.getCell().intValue())
-                            .setCellValue(userAccount.getPhone());
-                } else if (s.getValue().equals("proportion")) {
-                    sheet.getRow(s.getRow().intValue())
-                            .getCell(s.getCell().intValue())
-                            .setCellValue(po.getOffer().getProportion());
-                } else if (s.getValue().equals("tax")) {
+                            .setCellValue(po.getOffer().getUpdatedtime());
+                } else if (s.getValue().equals(OfferConstant.TAX)) {//税率
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
                             .setCellValue(po.getOffer().getTax());
-                } else if (s.getValue().equals("discount")) {
+                } else if (s.getValue().equals(OfferConstant.DISCOUNT)) {//优惠折扣部分
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
                             .setCellValue(po.getOffer().getDiscount());
-                } else if (s.getValue().equals("englishName")) {
+                } else if (s.getValue().equals(UserConstant.COMPANYENGNAME)) {//用户公司英文名
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
                             .setCellValue(userAccount.getCompanyengname());
-                } else if (s.getValue().equals("url")) {
+                } else if (s.getValue().equals(UserConstant.WEBSITE)) {//用户网址
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
                             .setCellValue(userAccount.getWebsite());
-                } else if (s.getValue().equals("序号")) {
+                } else if (s.getValue().equals(ExcelConstant.NUMID)) {//序号
                     index = s.getRow();
-                } else if (s.getValue().equals("afterTax")) {
+                } else if (s.getValue().equals(OfferConstant.TOTALTAX)) {//含税总计
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
                             .setCellValue(po.getOffer().getTotaltax());
-                } else if (s.getValue().equals("taxation")) {
+                } else if (s.getValue().equals(OfferConstant.TAXATION)) {//税金
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
                             .setCellValue(po.getOffer().getTaxation());
-                } else if (s.getValue().equals("TotalAllItem")) {
+                } else if (s.getValue().equals(OfferConstant.TOTALNOTAX)) {//不含税总计
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
-                            .setCellValue(po.getOffer().getTotaltax());
-                } else if (s.getValue().equals("offerDate")) {
+                            .setCellValue(po.getOffer().getTotalnotax());
+                } else if (s.getValue().equals(ProjectOfferConstant.DATE)) {//项目报价时间
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
                             .setCellValue(po.getDate());
@@ -319,7 +313,7 @@ public class EmailService {
             }
 
             Integer in1 = Integer.valueOf(index.intValue() + 1);
-
+            System.out.print(in1);
             List<Resourcetypes> resourceList = po.getOffer().getResourcetypes();
 
             Integer count = Integer.valueOf(resourceList.size());
@@ -327,7 +321,7 @@ public class EmailService {
             if (count.intValue() != 0) {
                 for (int g = (resourceList.size() - 1); g >= 0; g--) {
                     Resourcetypes r = resourceList.get(g);
-                    if (r.getSelectedresources().size() > 1) {
+                    if (r.getSelectedresources().size() > 0) {
                         // 插入空白行 3行
                         PoiUtil.insertRow(sheet, in1, 2);
                         // 获取sheet2中的样式
@@ -350,7 +344,7 @@ public class EmailService {
                             String value2 = row2.getCell(k)
                                     .getStringCellValue().trim();
                             // 判断如果与给定值相等，进行等值替换
-                            if (value2.equals("resourceType")) {
+                            if (value2.equals(ResourceConstant.RESOURCETYPE)) {//资源分类归属
                                 row2.getCell(k).setCellValue(r.getName());
                             }
                         }
@@ -362,7 +356,7 @@ public class EmailService {
                             String value2 = row6.getCell(k)
                                     .getStringCellValue().trim();
                             // 判断如果与给定值相等，进行等值替换
-                            if (value2.equals("TypeTotal")) {
+                            if (value2.equals(OfferConstant.TYPETOTAL)) {//分类小计
                                 row6.getCell(k).setCellValue(r.getTypetotal());
                             }
                         }
@@ -371,7 +365,7 @@ public class EmailService {
                         Integer rsize = Integer.valueOf(r
                                 .getSelectedresources().size());
                         // 如果不少于1件设备，我们可以进行操作
-                        if (rsize.intValue() > 1) {
+                        if (rsize.intValue() > 0) {
 
                             // 对不少于1件的分类进行遍历操作
                             for (int w = 0; w < rsize.intValue(); w++) {
@@ -398,29 +392,29 @@ public class EmailService {
                                     String value3 = row3.getCell(x)
                                             .getStringCellValue().trim();
 
-                                    if (value3.equals("simpleName")) {
+                                    if (value3.equals(ResourceConstant.SIMPLENAME)) {//设备简称
                                         row3.getCell(x).setCellValue(
                                                 s.getSimplename());
-                                    } else if (value3.equals("resourceName")) {
+                                    } else if (value3.equals(ResourceConstant.NAME)) {//设备规格,临时修改
                                         row3.getCell(x).setCellValue(
                                                 s.getName());
-                                    } else if (value3.equals("resourceID")) {
+                                    } else if (value3.equals(ResourceConstant.NUMID)) {//序号
                                         row3.getCell(x).setCellValue(
                                                 String.valueOf(w + 1));
-                                    } else if (value3.equals("resourceCount")) {
+                                    } else if (value3.equals(ResourceConstant.AMOUNT)) {//设备数量
                                         row3.getCell(x).setCellValue(
                                                 s.getAmount().toString());
-                                    } else if (value3.equals("resourceUnit")) {
+                                    } else if (value3.equals(ResourceConstant.UNIT)) {//设备单位
                                         row3.getCell(x).setCellValue(
                                                 s.getUnit().toString());
-                                    } else if (value3.equals("days")) {
+                                    } else if (value3.equals(ResourceConstant.DAYS)) {//设备天数
                                         row3.getCell(x).setCellValue(
                                                 s.getDays().toString());
-                                    } else if (value3.equals("unitPrice")) {
+                                    } else if (value3.equals(ResourceConstant.UNITPRICE)) {//设备单价
                                         row3.getCell(x).setCellValue(
                                                 Double.toString(s
                                                         .getUnitprice()));
-                                    } else if (value3.equals("subTotal")) {
+                                    } else if (value3.equals(ResourceConstant.SUBTOTAL)) {//设备单条小计
                                         row3.getCell(x).setCellValue(
                                                 s.getSubTotal());
                                     }
@@ -432,7 +426,7 @@ public class EmailService {
             }
 
         } catch (IOException e) {
-            // e.printStackTrace();
+           // e.printStackTrace();
         } finally {
             try {
                 in.close();

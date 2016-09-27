@@ -8,16 +8,24 @@ import org.springframework.data.annotation.Id;
 public class FileManager {
 
     @Id
-    private String oid;
-    private String name;
-    private String basepath;
-    private String url;
-    private String date;
-    private String othername;
-    private String uid;
-    private String offerOid;
-    private String type;
+    private String oid;//ID
+    private String name;//文件名称
+    private String basepath;//基础路径
+    private String url;//远程路径
+    private String date;//更新时间
+    private String othername;//系统名称
+    private String uid;//拥有者
+    private String offerOid;//报价单id
+    private String type;//文件类型
+    private String postfix;//后缀
 
+    public String getPostfix() {
+        return postfix;
+    }
+
+    public void setPostfix(String postfix) {
+        this.postfix = postfix;
+    }
 
     public String getType() {
         return type;

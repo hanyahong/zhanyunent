@@ -8,12 +8,21 @@ import java.io.File;
 
 import java.io.FileOutputStream;
 
+import java.io.InputStream;
 import java.text.DateFormat;
 
 import java.text.SimpleDateFormat;
 
 import java.util.Date;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.Log4JLogger;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.InputStreamSource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 public class FileUtil {
@@ -50,6 +59,13 @@ public class FileUtil {
         return Integer.valueOf(2);
     }
 
+
+    /**
+     * 删除文件夹
+     *
+     * @param sPath
+     * @return
+     */
     public boolean DeleteFolder(String sPath) {
         boolean flag = false;
         File file = new File(sPath);
@@ -64,6 +80,12 @@ public class FileUtil {
         return deleteDirectory(sPath);
     }
 
+    /**
+     * 删除文件路径
+     *
+     * @param sPath
+     * @return
+     */
     public boolean deleteDirectory(String sPath) {
         if (!sPath.endsWith(File.separator)) {
             sPath = sPath + File.separator;
@@ -97,6 +119,12 @@ public class FileUtil {
         return false;
     }
 
+    /**
+     * 删除文件
+     *
+     * @param sPath
+     * @return
+     */
     public boolean deleteFile(String sPath) {
         boolean flag = false;
         File file = new File(sPath);
@@ -108,6 +136,11 @@ public class FileUtil {
         return flag;
     }
 
+    /**
+     * 格式化时间
+     *
+     * @return yyyy-MM-dd HH:mm:ss
+     */
     public static String getFormatDate() {
         Date date = new Date();
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -116,18 +149,40 @@ public class FileUtil {
         return dateAndTime;
     }
 
+    /**
+     * 创建用户别名(带后缀)
+     *
+     * @param file
+     * @return
+     */
     public static String getOtherName(MultipartFile file) {
-        String fileName = file.getOriginalFilename();
-
-        String prefix = fileName.substring(fileName.lastIndexOf(".") + 1);
-
+        String postfix = getPostfix(file);
         String random = RandomUtil.getRandomFileName();
-
-        String othername = random + "." + prefix;
+        String othername = random + "." + postfix;
         return othername;
     }
 
-    public static String createUserFiles(String oid, String url, String folder) {
+    /**
+     * 获取文件后缀
+     *
+     * @param file
+     * @return
+     */
+    public static String getPostfix(MultipartFile file) {
+        String fileName = file.getOriginalFilename();
+        String postfix = fileName.substring(fileName.lastIndexOf(".") + 1);
+        return postfix;
+    }
+
+    /**
+     * 创建用户文件夹
+     *
+     * @param oid
+     * @param url
+     * @param folder
+     * @return
+     */
+    public static String createUserFolder(String oid, String url, String folder) {
         String uid = oid + File.separator;
         String filesurl = folder + File.separator;
         File file = new File(url + uid + filesurl);
@@ -138,6 +193,12 @@ public class FileUtil {
         return url + uid + filesurl;
     }
 
+    /**
+     * 文件类型校验
+     *
+     * @param file
+     * @return
+     */
     public static Integer verifyFileType(MultipartFile file) {
         String fileName = file.getOriginalFilename();
 

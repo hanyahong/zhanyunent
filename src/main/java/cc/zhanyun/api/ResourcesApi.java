@@ -121,12 +121,12 @@ public class ResourcesApi {
     }
 
     /**
-     * 查询用户资源分类库
+     * 查询用户资源分类
      *
      * @return
      * @throws NotFoundException
      */
-    @ApiOperation(value = "(分类操作)查询用户资源分类库", notes = "查询用户资源分类库", response = ResourcesTypeOne.class, responseContainer = "List")
+    @ApiOperation(value = "(分类操作)查询用户资源分类", notes = "查询用户资源分类", response = ResourcesTypeOne.class, responseContainer = "List")
     @ApiResponses({@io.swagger.annotations.ApiResponse(code = 200, message = "获取成功", response = ResourcesTypeOne.class), @io.swagger.annotations.ApiResponse(code = 500, message = "服务器响应失败", response = ResourcesTypeOne.class)})
     @RequestMapping(value = {"/types"}, produces = {"application/json"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET})
     @ResponseBody
@@ -152,20 +152,7 @@ public class ResourcesApi {
         return new ResponseEntity(info, HttpStatus.OK);
     }
 
-    /**
-     * 初始化分类
-     *
-     * @return
-     * @throws NotFoundException
-     */
-    @ApiOperation(value = "(分类操作)初始化分类", notes = "初始化分类", response = Void.class)
-    @ApiResponses({@io.swagger.annotations.ApiResponse(code = 200, message = "添加成功", response = Void.class), @io.swagger.annotations.ApiResponse(code = 500, message = "添加失败", response = Void.class)})
-    @RequestMapping(value = {"/type/default"}, produces = {"application/json"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
-    public ResponseEntity<Void> resourcesTypesPost()
-            throws NotFoundException {
-        this.typeservice.saveTypeOfOneUser();
-        return new ResponseEntity(HttpStatus.OK);
-    }
+
 
     /**
      * 单条删除设备的分类

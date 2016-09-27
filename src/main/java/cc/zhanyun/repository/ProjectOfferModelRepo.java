@@ -1,5 +1,6 @@
 package cc.zhanyun.repository;
 
+import cc.zhanyun.model.ProjectOffer;
 import cc.zhanyun.model.ProjectOfferModel;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -14,5 +15,7 @@ public interface ProjectOfferModelRepo extends MongoRepository<ProjectOfferModel
 
     public List<ProjectOfferModel> findByUid(String uid, Pageable pageable);
 
-    public List<ProjectOfferModel> findByStatus(String status, Pageable pageable);
+    public ProjectOfferModel findByOidAndUid(String oid, String uid);
+
+    public List<ProjectOfferModel> findByStatusAndUid(String status, Pageable pageable, String uid);
 }

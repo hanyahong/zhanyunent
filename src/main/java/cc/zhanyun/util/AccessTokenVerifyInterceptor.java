@@ -24,8 +24,7 @@ public class AccessTokenVerifyInterceptor extends HandlerInterceptorAdapter {
                              HttpServletResponse response, Object handler) throws Exception {
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader("Access-Control-Allow-Methods",
-                " OPTIONS,GET, POST, PUT, DELETE,, HEAD");
+        response.setHeader("Access-Control-Allow-Methods", " OPTIONS,GET, POST, PUT, DELETE,, HEAD");
 
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Expose-Headers", "token");
@@ -39,8 +38,8 @@ public class AccessTokenVerifyInterceptor extends HandlerInterceptorAdapter {
 
         boolean flag = false;
 
-        String accessToken = request.getHeader("token");
-//        String accessToken = "20160913146807";
+// String accessToken = request.getHeader("token");
+        String accessToken = "20160913146807";
         if (StringUtils.isNotBlank(accessToken)) {
             UserAccount u = this.userRepoImpl.selUserByToken(accessToken);
             if (u != null) {

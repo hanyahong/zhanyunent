@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import java.util.Objects;
-
 
 @ApiModel(description = "")
 public class Selectedresources {
@@ -13,8 +11,8 @@ public class Selectedresources {
     private String simplename = null;
     private Integer amount = null;
     private String unit = null;
-    private Integer days = null;
-    private double unitprice;
+    private Double days = null;
+    private Integer unitprice;
     private String subTotal;
     private String specifications;//规格
     private String remarks;//备注
@@ -90,41 +88,25 @@ public class Selectedresources {
 
     @ApiModelProperty("资源天数")
     @JsonProperty("days")
-    public Integer getDays() {
+    public Double getDays() {
         return this.days;
     }
 
-    public void setDays(Integer days) {
+    public void setDays(Double days) {
         this.days = days;
     }
 
 
     @ApiModelProperty("资源单价")
     @JsonProperty("unitprice")
-    public double getUnitprice() {
+    public Integer getUnitprice() {
         return this.unitprice;
     }
 
-    public void setUnitprice(double unitprice) {
+    public void setUnitprice(Integer unitprice) {
         this.unitprice = unitprice;
     }
 
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if ((o == null) || (getClass() != o.getClass())) {
-            return false;
-        }
-        Selectedresources selectedresources = (Selectedresources) o;
-
-
-        return (Objects.equals(this.name, selectedresources.name)) && (Objects.equals(this.simplename, selectedresources.simplename)) && (Objects.equals(this.amount, selectedresources.amount)) && (Objects.equals(this.unit, selectedresources.unit)) && (Objects.equals(this.days, selectedresources.days)) && (Objects.equals(Double.valueOf(this.unitprice), Double.valueOf(selectedresources.unitprice)));
-    }
-
-    public int hashCode() {
-        return Objects.hash(new Object[]{this.name, this.simplename, this.amount, this.unit, this.days, Double.valueOf(this.unitprice)});
-    }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();

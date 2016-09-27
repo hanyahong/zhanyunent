@@ -27,6 +27,12 @@ public class ProjectOfferModelServiceImpl implements ProjectOfferModelService {
     @Autowired
     private TokenUtil tokenUtil;
 
+    /**
+     * 增加报价单模板
+     *
+     * @param projectOfferModel
+     * @return
+     */
     @Override
     public Info addProjectOfferModel(ProjectOfferModel projectOfferModel) {
 
@@ -44,6 +50,12 @@ public class ProjectOfferModelServiceImpl implements ProjectOfferModelService {
         return info;
     }
 
+    /**
+     * 删除报价单模板
+     *
+     * @param oid
+     * @return
+     */
     @Override
     public Info delProjectOfferModel(String oid) {
         Info info = new Info();
@@ -56,6 +68,13 @@ public class ProjectOfferModelServiceImpl implements ProjectOfferModelService {
         return info;
     }
 
+    /**
+     * 查询报价单模板列表
+     *
+     * @param num
+     * @param size
+     * @return
+     */
     @Override
     public List<ProjectOfferModel> selProjectOfferModelList(Integer num, Integer size) {
         String uid = tokenUtil.tokenToOid();
@@ -68,12 +87,26 @@ public class ProjectOfferModelServiceImpl implements ProjectOfferModelService {
 
     }
 
+    /**
+     * 单条查询报价单模板
+     *
+     * @param oid
+     * @return
+     */
     @Override
     public ProjectOfferModel selProjectOfferModel(String oid) {
 
-        return projectOfferModelRepo.selProjectOfferModel(oid);
+        return projectOfferModelRepo.selProjectOfferModel(oid, tokenUtil.tokenToOid());
     }
 
+    /**
+     * 按照状态查询报价单模板
+     *
+     * @param status
+     * @param num
+     * @param size
+     * @return
+     */
     @Override
     public List<ProjectOfferModel> selProjectOfferModelListByStatus(String status, Integer num, Integer size) {
         Pageable pageable = null;
@@ -81,9 +114,15 @@ public class ProjectOfferModelServiceImpl implements ProjectOfferModelService {
             pageable = new PageRequest(num, size);
         }
 
-        return projectOfferModelRepo.selProjectOfferModelByStatus(status, pageable);
+        return projectOfferModelRepo.selProjectOfferModelByStatus(status, pageable, tokenUtil.tokenToOid());
     }
 
+    /**
+     * 更新报价单模板
+     *
+     * @param info
+     * @return
+     */
     @Override
     public Info updateProjectOfferModelStatus(Info info) {
         Info in = new Info();
