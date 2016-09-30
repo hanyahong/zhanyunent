@@ -9,10 +9,10 @@ import io.swagger.annotations.ApiModelProperty;
 public class Selectedresources {
     private String name = null;
     private String simplename = null;
-    private Integer amount = null;
+    private Double amount = null;
     private String unit = null;
     private Double days = null;
-    private Integer unitprice;
+    private String unitprice;
     private String subTotal;
     private String specifications;//规格
     private String remarks;//备注
@@ -66,11 +66,11 @@ public class Selectedresources {
 
     @ApiModelProperty("资源数量")
     @JsonProperty("amount")
-    public Integer getAmount() {
+    public Double getAmount() {
         return this.amount;
     }
 
-    public void setAmount(Integer amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 
@@ -99,11 +99,11 @@ public class Selectedresources {
 
     @ApiModelProperty("资源单价")
     @JsonProperty("unitprice")
-    public Integer getUnitprice() {
+    public String getUnitprice() {
         return this.unitprice;
     }
 
-    public void setUnitprice(Integer unitprice) {
+    public void setUnitprice(String unitprice) {
         this.unitprice = unitprice;
     }
 

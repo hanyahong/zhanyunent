@@ -3,11 +3,15 @@ package cc.zhanyun.repository.impl;
 import cc.zhanyun.model.file.FileLib;
 import cc.zhanyun.model.file.FileManager;
 import cc.zhanyun.repository.FileLibRepositry;
+import com.mongodb.BasicDBObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by hyh on 16-9-27.
@@ -43,9 +47,37 @@ public class FileLibRepositryImpl {
      * @param oid
      */
     public FileLib selFileLib(String oid) {
+
+
         return fileLibRepositry.findOne(oid);
     }
 
+    /**
+     * 查询单条库 按照fileoid
+     *
+     * @param oid
+     */
+    public FileLib selFileLibByUidAndFileOid(String uid, String oid) {
+
+
+        return fileLibRepositry.findOne(oid);
+    }
+
+    /**
+     * 查询单条库中文件
+     *
+     * @param oid
+     */
+    public List<FileManager> selFileLibFileList(String oid) {
+        List<FileManager> fileManagers = null;
+        FileLib fileLib = fileLibRepositry.findOne(oid);
+        if (fileLib != null) {
+            fileManagers = fileLib.getFileManagerList();
+        } else {
+            fileManagers = new ArrayList<FileManager>();
+        }
+        return fileManagers;
+    }
 
     /**
      * 单条删除文件库单条文件信息
@@ -57,9 +89,9 @@ public class FileLibRepositryImpl {
         Integer integer = 0;
         try {
             Query query = Query.query(Criteria.where("_id").is(oid)
-                    .and("fileManager._id").is(oid));
+                    .and("fileManagerList._id").is(fileoid));
             Update update = new Update();
-            update.unset("fileManager.$");
+            update.pull("fileManagerList", new BasicDBObject("_id", fileoid));
             this.mongoTemplate.updateFirst(query, update, FileLib.class);
             integer = 1;
         } catch (Exception e) {
@@ -80,7 +112,7 @@ public class FileLibRepositryImpl {
         try {
             Query query = Query.query(Criteria.where("_id").is(oid));
             Update update = new Update();
-            update.addToSet("fileManager", fileManager);
+            update.addToSet("fileManagerList", fileManager);
             this.mongoTemplate.upsert(query, update, FileLib.class);
         } catch (Exception e) {
             return Integer.valueOf(0);

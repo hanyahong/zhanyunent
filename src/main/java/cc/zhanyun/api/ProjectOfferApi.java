@@ -198,7 +198,7 @@ public class ProjectOfferApi {
     @RequestMapping(value = {"/image/batch/{oid}"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
     public List<Info> batchProjectOfferImageUpload(
             @ApiParam(value = "报价单ID", required = true) @PathVariable("oid") String oid,
-            List<MultipartFile> multipartFileList) {
+            @RequestParam("file") List<MultipartFile> multipartFileList) {
         return this.service.batchUpdateProjectOfferImage(multipartFileList, oid);
     }
 

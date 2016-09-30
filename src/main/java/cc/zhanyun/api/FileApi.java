@@ -1,5 +1,9 @@
 package cc.zhanyun.api;
 
+import cc.zhanyun.model.file.FileLib;
+import cc.zhanyun.model.file.FileManager;
+import cc.zhanyun.model.image.ImageProperty;
+import cc.zhanyun.repository.impl.FileLibRepositryImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -41,6 +45,8 @@ public class FileApi {
     private ImageRepoImpl image;
     @Autowired
     private ImageService imageService;
+    @Autowired
+    private FileLibRepositryImpl fileLibRepositry;
 
     /**
      * 上传上传
@@ -73,7 +79,7 @@ public class FileApi {
     @RequestMapping(value = {"/filelab/batch/{oid}"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
     public ResponseEntity<List<Info>> handleBatchFileUpload(
             @ApiParam(value = "文件库oid", required = true) @PathVariable("oid") String oid
-            ,@RequestParam("file") List<MultipartFile> files) {
+            , @RequestParam("file") List<MultipartFile> files) {
         List<Info> infoList = this.service.batchUploadFiles(files, oid);
         return new ResponseEntity(infoList, HttpStatus.OK);
     }
@@ -165,6 +171,22 @@ public class FileApi {
     }
 
     /**
+     * 文件库查询
+     *
+     * @param libOid
+     * @return
+     * @throws NotFoundException
+     */
+    @ApiOperation(value = "(文件操作)查询文件库", notes = "查询文件库", response = FileManager.class, responseContainer = "list")
+    @RequestMapping(value = {"/filelab/{libOid}"}, produces = {"application/json"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET})
+    public ResponseEntity<List<FileManager>> selFileLibPost(
+            @ApiParam(value = "文件库ID", required = true) @PathVariable("libOid") String libOid)
+            throws NotFoundException {
+        List<FileManager> fileLib = this.fileLibRepositry.selFileLibFileList(libOid);
+        return new ResponseEntity(fileLib, HttpStatus.OK);
+    }
+
+    /**
      * app更新
      *
      * @return
@@ -187,12 +209,12 @@ public class FileApi {
      * @return
      * @throws IOException
      */
-    @ApiOperation(value = "(图片库)查询照片库", notes = "查询照片库", response = Image.class)
+    @ApiOperation(value = "(图片库)查询照片库", notes = "查询照片库", response = ImageProperty.class)
     @ApiResponses({
             @io.swagger.annotations.ApiResponse(code = 200, message = "获取成功", response = Image.class),
             @io.swagger.annotations.ApiResponse(code = 500, message = "服务器响应失败", response = cc.zhanyun.model.Error.class)})
     @RequestMapping(value = {"/image/{oid}"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET})
-    public List<ImageProVO> downloadImage(
+    public List<ImageProperty> downloadImage(
             @ApiParam(value = "ID", required = true) @PathVariable("oid") @RequestBody String oid)
             throws IOException {
         return this.imageService.selImagesByOid(oid);

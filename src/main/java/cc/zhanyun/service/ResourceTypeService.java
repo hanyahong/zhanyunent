@@ -9,7 +9,7 @@ import java.util.List;
 
 public abstract interface ResourceTypeService {
     //单条保存用户分类库(用户层面,单条增加类型集合)(默认初始化一个)
-    public abstract void saveTypeOfOneUser();
+    public abstract void saveTypeOfOneUser(String uid);
 
     //查询分类
     public abstract List<ResourcesTypeOne> selTypeOfOneUser();

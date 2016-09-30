@@ -32,10 +32,10 @@ public class ResourceTypeServiceImpl
     /**
      * 初始化分类
      */
-    public void saveTypeOfOneUser() {
+    public void saveTypeOfOneUser(String uid) {
         ResourcesTypes resourcesTypes = new ResourcesTypes();
-        resourcesTypes.setOid(token.tokenToOid());
-        resourcesTypes.setUid(token.tokenToOid());
+        resourcesTypes.setOid(uid);
+        resourcesTypes.setUid(uid);
         List<ResourcesTypeOne> rtList = new ArrayList<ResourcesTypeOne>();
         ResourcesTypeOne one1 = new ResourcesTypeOne();
 

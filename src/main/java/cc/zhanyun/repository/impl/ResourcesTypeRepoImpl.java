@@ -49,10 +49,9 @@ public class ResourcesTypeRepoImpl {
     public Integer delResourceType(String oid, String uid) {
         Integer integer = 0;
         try {
-            Query query = new Query(Criteria.where("_id").is(uid)
-                    .and("typelist._id").is(oid));
+            Query query = new Query(Criteria.where("_id").is(uid));
             Update update = new Update();
-            update.unset("typelist.$");
+            update.pull("typelist", new BasicDBObject("_id", oid));
             this.mongoTemplate.updateFirst(query, update, ResourcesTypes.class);
             integer = 1;
         } catch (Exception e) {

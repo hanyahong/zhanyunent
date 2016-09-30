@@ -117,6 +117,13 @@ public class FileServiceImpl implements FileService {
         return infoList;
     }
 
+    /**
+     * 下载
+     *
+     * @param libOid
+     * @param fileOid
+     * @return
+     */
     @Override
     public String downloadFileOfFileLib(String libOid, String fileOid) {
         String url = null;
@@ -125,14 +132,21 @@ public class FileServiceImpl implements FileService {
         List<FileManager> list = fileLib.getFileManagerList();
         for (FileManager f : list) {
             if (f.getOid().equals(fileOid)) {
-                url = Constant.BASEPATH + f.getUrl();
+                url = f.getUrl();
             }
         }
         return url;
     }
 
+    /**
+     * 删除
+     *
+     * @param libOid
+     * @param fileOid
+     * @return
+     */
     @Override
-    public Info delFileOfFileLib(String libOid, String fileOid) {
+    public Info delFileOfFileLib(String libOid,String fileOid) {
         Info info = new Info();
         Integer in = fileLibRepositry.delOneOfFileInFileLib(libOid, fileOid);
         if (in == 1) {

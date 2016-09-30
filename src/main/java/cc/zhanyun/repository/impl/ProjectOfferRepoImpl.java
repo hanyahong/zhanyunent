@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -70,7 +71,13 @@ public class ProjectOfferRepoImpl {
      * @return
      */
     public List<ProjectOffer> selProOfferList(String uid, Pageable pageable) {
-        List<ProjectOffer> polist = this.por.findByUid(uid, pageable);
+        Query query = new Query();//查询条件
+        query.addCriteria(Criteria.where("uid").is(uid));
+        Sort sort = new Sort(Sort.Direction.ASC, "date");//排序条件
+        query.with(sort);
+        query.with(pageable);
+
+        List<ProjectOffer> polist = mongoTemplate.find(query, ProjectOffer.class);
 
         return polist;
     }
@@ -83,7 +90,12 @@ public class ProjectOfferRepoImpl {
      * @return
      */
     public List<ProjectOffer> selProOfferOfStatusList(Integer status, String uid, Pageable pageable) {
-        List<ProjectOffer> plist = this.por.findByofferStatusAndUid(status, uid, pageable);
+        Query query = new Query();//查询条件
+        query.addCriteria(Criteria.where("uid").is(uid).and("offer.status").is(status));
+        Sort sort = new Sort(Sort.Direction.DESC, "date");//排序条件
+        query.with(sort);
+        query.with(pageable);
+        List<ProjectOffer> plist = mongoTemplate.find(query, ProjectOffer.class);
 
         return plist;
     }
@@ -98,7 +110,7 @@ public class ProjectOfferRepoImpl {
 
         Update update = new BasicUpdate(basicDBObject);
 
-        this.mongoTemplate.upsert(new Query(Criteria.where("_id").is(ov.getOid())), update, "projectOffer");
+        this.mongoTemplate.upsert(new Query(Criteria.where("_id").is(ov.getOid())), update, ProjectOffer.class);
     }
 
 

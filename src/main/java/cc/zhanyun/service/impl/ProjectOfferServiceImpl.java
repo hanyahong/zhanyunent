@@ -375,48 +375,70 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
 
 
     public void offerMath(ProjectOffer po) {
+        //基本属性设置
         po.setDate(DateUtil.getCurDate());
         po.getProject().setCreatetime(DateUtil.getCurDate());
         po.getOffer().setUpdatedtime(DateUtil.getCurDate());
+        //载体对象 报价单
         Offer offer = po.getOffer();
-        List<Double> offertotal = new ArrayList();
+        //分类小计集合
+        List<Double> typeTotal = new ArrayList();
+        //获取数据分类信息
         List<Resourcetypes> tlist = po.getOffer().getResourcetypes();
-
+        //对分类遍历
         for (Resourcetypes t : tlist) {
+            List<Double> dlist = new ArrayList();//分类小计
+            //获取分类下资源条数
             List<Selectedresources> slist = t.getSelectedresources();
-
-            List<Double> dlist = new ArrayList();
+            //
             for (Selectedresources s : slist) {
-                Integer amount = s.getAmount();
-                Integer unitprice = s.getUnitprice();
-
+                Double amount = s.getAmount();
+                Double unitprice = Double.parseDouble(s.getUnitprice());
+                //单条小计计算
                 double total = amount.intValue() * unitprice * s.getDays();
-
+                //设置单条小计值
                 s.setSubTotal(String.valueOf(Math.round(total)));
-
+                //设置单价格式
+                s.setUnitprice(String.valueOf(Math.round(unitprice)));
+                //设置天数格式
+                //传入集合
                 dlist.add(Double.valueOf(total));
             }
-
+            //各类小计计算
             double tt = 0.0D;
             for (int i = 0; i < dlist.size(); i++) {
                 tt += ((Double) dlist.get(i)).doubleValue();
             }
-
+            //设置各类小计
             t.setTypetotal(String.valueOf(Math.round(tt)));
-
-            offertotal.add(Double.valueOf(tt));
+            //各类小计,加入集合
+            typeTotal.add(Double.valueOf(tt));
         }
+        //税前总价计算
         double at = 0.0D;
-
-        for (int j = 0; j < offertotal.size(); j++) {
-            at += ((Double) offertotal.get(j)).doubleValue();
+        for (int j = 0; j < typeTotal.size(); j++) {
+            at += ((Double) typeTotal.get(j)).doubleValue();
         }
+        //设置税前总价
         po.getOffer().setTotalnotax(String.valueOf(Math.round(at)));
         //税金计算
+        double totaltax = 0;//税后价格
+        if (offer.getTax() != null) {
+            double t = Double.valueOf(offer.getTax()).doubleValue();//税金
+            double ta = (at / ((1 - t / 100)) * t) / 100;
 
-        double t = Double.valueOf(offer.getTax()).doubleValue();
-        offer.setTaxation(String.valueOf((Math.round((at / ((1 - t / 100)) * t)) / 100)));
-        double totaltax = at + t * at;
+            //设置税金
+            offer.setTaxation(String.valueOf(Math.round(ta)));
+            totaltax = at + ta;//税后价格=税前+税金
+        } else {
+            offer.setTax("0");
+            offer.setTaxation("0");
+        }
+        //设置税后总价
         offer.setTotaltax(String.valueOf(Math.round(totaltax)));
+        //设置优惠价
+        if (offer.getDiscount() == null) {
+            offer.setDiscount("0");//如果为空,设置为0 字符串
+        }
     }
 }

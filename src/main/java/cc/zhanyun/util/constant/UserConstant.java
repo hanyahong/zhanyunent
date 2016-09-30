@@ -11,7 +11,7 @@ public class UserConstant {
     public final static String PHONE = "<动态值>报价人电话";
     public final static String QQ = "<动态值>报价人QQ";
     public final static String USERNAME = "<动态值>报价人用户名";
-    public final static String WEBSITE = "报价人网站";
+    public final static String WEBSITE = "<动态值>报价人网站";
     public final static String USERINTRODUCTION = "<动态值>报价人行业";
     public final static String SEX = "<动态值>报价人性别";
     public final static String COMPANY = "<动态值>报价人公司名称";

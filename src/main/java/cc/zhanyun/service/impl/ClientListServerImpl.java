@@ -52,11 +52,11 @@ public class ClientListServerImpl implements ClientListService {
     public Info addClientListOne(ClientmanagerList clientmanagerList) {
         String oid = RandomUtil.getRandomFileName();
         String uid = tokenUtil.tokenToOid();
+        String imageOid = RandomUtil.getRandomFileName();
         //返回值载体
         Info info = new Info();
         try {
             //添加一个用户信息
-
             Clientmanager clientmanager = new Clientmanager();
 
             clientmanager.setOid(oid);
@@ -68,6 +68,7 @@ public class ClientListServerImpl implements ClientListService {
             clientmanager.setEmail(clientmanagerList.getEmail());
             clientmanager.setWechat(clientmanager.getWechat());
             clientmanager.setQq(clientmanager.getQq());
+            clientmanager.setImage(imageOid);
 
             clientRepo.addClient(clientmanager);
             //添加独立列表(电脑端使用)
@@ -104,6 +105,7 @@ public class ClientListServerImpl implements ClientListService {
             clientmanager.setEmail(clientmanagerList.getEmail());
             clientmanager.setWechat(clientmanagerList.getWechat());
             clientmanager.setQq(clientmanagerList.getQq());
+            clientmanager.setImage(clientmanager.getImage());
 
             clientRepo.updateClientBase(clientmanager);
             //添加独立列表(电脑端使用)

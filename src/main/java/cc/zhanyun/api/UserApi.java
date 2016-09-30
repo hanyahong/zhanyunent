@@ -110,24 +110,7 @@ public class UserApi {
     }
 
 
-    /**
-     * 上传头像
-     *
-     * @param oid
-     * @param file
-     * @return
-     */
-    @ApiOperation(value = "上传头像", notes = "上传头像", response = Info.class)
-    @ApiResponses({
-            @io.swagger.annotations.ApiResponse(code = 200, message = "获取成功", response = Info.class),
-            @io.swagger.annotations.ApiResponse(code = 500, message = "服务器响应失败", response = cc.zhanyun.model.Error.class)})
-    @RequestMapping(value = {"/upload/{oid}"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
-    public ResponseEntity<Info> userImageUpload(
-            @ApiParam(value = "用户ID", required = true) @PathVariable("oid") String oid,
-            MultipartFile file) {
-        Info in = this.service.uploadImage(oid, file);
-        return new ResponseEntity<Info>(in, HttpStatus.OK);
-    }
+
 
     /**
      * 忘记密码
@@ -155,6 +138,26 @@ public class UserApi {
             @ApiParam("信息") @RequestBody UserVO userVO) {
         Info info = this.service.updateUserPhone(userVO);
         return new ResponseEntity<Info>(info, HttpStatus.OK);
+    }
+
+    /**
+     * 上传头像
+     *
+     * @param oid
+     * @param file
+     * @return
+     */
+    @ApiOperation(value = "上传头像", notes = "上传头像", response = Info.class)
+    @ApiResponses({
+            @io.swagger.annotations.ApiResponse(code = 200, message = "获取成功", response = Info.class),
+            @io.swagger.annotations.ApiResponse(code = 500, message = "服务器响应失败", response = cc.zhanyun.model.Error.class)})
+    @RequestMapping(value = {"/upload/{oid}"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
+    public ResponseEntity<Info> userImageUpload(
+            @ApiParam(value = "用户ID", required = true) @PathVariable("oid") String oid,
+            MultipartFile file) {
+
+        Info in = this.service.uploadImage(oid, file);
+        return new ResponseEntity<Info>(in, HttpStatus.OK);
     }
 
 }

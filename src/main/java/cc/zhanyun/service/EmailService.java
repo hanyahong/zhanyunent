@@ -9,11 +9,10 @@ import javax.mail.internet.MimeMessage;
 
 import cc.zhanyun.model.*;
 import cc.zhanyun.util.constant.*;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -127,7 +126,7 @@ public class EmailService {
         String newFileName = null;
         if (fm == null) {
             newFileName = RandomUtil.getRandomFileName() + ".xls";
-            filemanager.setName(po.getName() + ".xls");
+            filemanager.setName(po.getName() + "项目报价单.xls");
             filemanager.setOthername(newFileName);
             filemanager.setBasepath(Constant.BASEPATH);
             filemanager.setUrl(saveurl);
@@ -205,27 +204,42 @@ public class EmailService {
                 row = sheet.getRow(j);
 
                 for (int k = 0; k < row.getLastCellNum(); k++) {
-                    String value = row.getCell(k).getStringCellValue().trim();
+                    String value = "#";
+                    if (row.getCell(k) != null) {
+                        value = row.getCell(k).getStringCellValue().trim();
+                        // System.out.println();
+                    }
+                    // System.out.print("|--" + j + "_" + k + "_" + value + "|");
                     Status status = new Status();
                     status.setCell(Integer.valueOf(k));
                     status.setRow(Integer.valueOf(j));
                     status.setValue(value);
                     slist.add(status);
                 }
+                //  System.out.println();
             }
 
             Integer index = Integer.valueOf(0);
             for (Status s : slist) {
                 if (s.getValue().equals(UserConstant.COMPANY)) {
                     sheet.getRow(s.getRow().intValue()).getCell(s.getCell().intValue())
-                            .setCellValue(userAccount.getCompany() + "报价单");
+                            .setCellValue(userAccount.getCompany());
+                } else if (s.getValue().equals(ExcelConstant.TITLE)) {//报价单标题
+                    sheet.getRow(s.getRow().intValue())
+                            .getCell(s.getCell().intValue()).setCellValue(userAccount.getCompany() + "视听设备报价单");
+                } else if (s.getValue().equals(ExcelConstant.TITLESTYLE2)) {//报价单标题
+                    sheet.getRow(s.getRow().intValue())
+                            .getCell(s.getCell().intValue()).setCellValue(po.getName() + "项目视听设备报价单");
                 } else if (s.getValue().equals(UserConstant.PHONE)) {//&&&&&用户电话
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue()).setCellValue(userAccount.getPhone());
                 } else if (s.getValue().equals(UserConstant.NAME)) {//&&&&&用户姓名
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue()).setCellValue(userAccount.getName());
-                } else if (s.getValue().equals(UserConstant.COMPANY)) {//&&&&&用户公司
+                } else if (s.getValue().equals(UserConstant.NAME)) {//&&&&&用户姓名
+                    sheet.getRow(s.getRow().intValue())
+                            .getCell(s.getCell().intValue()).setCellValue(userAccount.getEmail());
+                } else if (s.getValue().equals(UserConstant.EMAIL)) {//&&&&&邮箱
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue()).setCellValue(userAccount.getCompany());
                 } else if (s.getValue().equals(ClientConstant.NAME)) {//客户姓名
@@ -278,11 +292,11 @@ public class EmailService {
                 } else if (s.getValue().equals(OfferConstant.TAX)) {//税率
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
-                            .setCellValue(po.getOffer().getTax());
-                } else if (s.getValue().equals(OfferConstant.DISCOUNT)) {//优惠折扣部分
+                            .setCellValue(po.getOffer().getTax() + "%");
+                } else if (s.getValue().equals(OfferConstant.DISCOUNT)) {//优惠价格
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
-                            .setCellValue(po.getOffer().getDiscount());
+                            .setCellValue("¥" + po.getOffer().getDiscount());
                 } else if (s.getValue().equals(UserConstant.COMPANYENGNAME)) {//用户公司英文名
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
@@ -296,15 +310,15 @@ public class EmailService {
                 } else if (s.getValue().equals(OfferConstant.TOTALTAX)) {//含税总计
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
-                            .setCellValue(po.getOffer().getTotaltax());
+                            .setCellValue("¥" + po.getOffer().getTotaltax());
                 } else if (s.getValue().equals(OfferConstant.TAXATION)) {//税金
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
-                            .setCellValue(po.getOffer().getTaxation());
+                            .setCellValue("¥" + po.getOffer().getTaxation());
                 } else if (s.getValue().equals(OfferConstant.TOTALNOTAX)) {//不含税总计
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
-                            .setCellValue(po.getOffer().getTotalnotax());
+                            .setCellValue("¥" + po.getOffer().getTotalnotax());
                 } else if (s.getValue().equals(ProjectOfferConstant.DATE)) {//项目报价时间
                     sheet.getRow(s.getRow().intValue())
                             .getCell(s.getCell().intValue())
@@ -312,7 +326,8 @@ public class EmailService {
                 }
             }
 
-            Integer in1 = Integer.valueOf(index.intValue() + 1);
+
+            Integer in1 = Integer.valueOf(index.intValue());
             // 标志位的下一行开始,循环(in1+1)
             List<Resourcetypes> resourceList = po.getOffer().getResourcetypes();
             //分类数
@@ -322,42 +337,50 @@ public class EmailService {
                 for (int g = (resourceList.size() - 1); g >= 0; g--) {
                     Resourcetypes r = resourceList.get(g);
                     if (r.getSelectedresources().size() > 0) {
-                        // 插入空白行 2行
-                        PoiUtil.insertRow(sheet, in1, 2);
-                        // 获取sheet2中的样式
-                        HSSFSheet sheet2 = workbook.getSheetAt(1);
-                        // 赋值每一行的样式 到 制定的行
-                        PoiUtil.copyRow(workbook, sheet2.getRow(0),
-                                sheet.createRow(in1.intValue() + 1), true);
-                        // 赋值每一行的样式 到 制定的行
-                        PoiUtil.copyRow(workbook, sheet2.getRow(2),
-                                sheet.createRow(in1.intValue() + 2), true);
-                        // 获取新加入的行
-                        HSSFRow row2 = sheet.getRow(in1.intValue() + 1);
+                        PoiUtil.insertRow(sheet, in1 + 1, 1);// 插入空白行 1行
 
+                        HSSFSheet sheet2 = workbook.getSheetAt(1);// 获取sheet2中的样式
+                        PoiUtil.copyRow(workbook, sheet2.getRow(0), sheet.createRow(in1.intValue() + 1), true);// 赋值第一行的样式 到 制定的行
+                        HSSFRow row2 = sheet.getRow(in1.intValue() + 1);  // 获取新加入的行
                         // 对其进行遍历每个单元格
                         for (int k = 0; k < row2.getLastCellNum(); k++) {
                             HSSFFont font = row2.getCell(k).getCellStyle().getFont(workbook);
                             // 获取每个单元各种的数据
-                            String value2 = row2.getCell(k)
-                                    .getStringCellValue().trim();
+                            String value2 = row2.getCell(k).getStringCellValue();
                             // 判断如果与给定值相等，进行等值替换
+                             System.out.print("-----"+k+value2);
                             if (value2.equals(ResourceConstant.RESOURCETYPE)) {//资源分类归属
                                 row2.getCell(k).setCellValue(r.getName());
+                                // System.out.print(r.getName());
+                            } else {
+                                // row2.getCell(k).setCellValue("");
                             }
                         }
-                        // 获取新加入的行
-                        HSSFRow row6 = sheet.getRow(in1.intValue() + 2);
-                        // 对其进行遍历每个单元格
-                        for (int k = 0; k < row6.getLastCellNum(); k++) {
-                            // 获取每个单元各种的数据
-                            String value2 = row6.getCell(k)
-                                    .getStringCellValue().trim();
-                            // 判断如果与给定值相等，进行等值替换
-                            if (value2.equals(OfferConstant.TYPETOTAL)) {//分类小计
-                                row6.getCell(k).setCellValue(r.getTypetotal());
+                        //模板样式选择
+                        HSSFSheet sheet3 = workbook.getSheetAt(2);// 获取sheet2中的样式
+                        if (!sheet3.getRow(0).getCell(1).getStringCellValue().equals(ExcelConstant.MODEL2)) {
+
+                        } else {
+                            //第二行数据 插入空白行 1行
+                            PoiUtil.insertRow(sheet, in1 + 2, 1);
+                            // 赋值每一行的样式 到 制定的行
+                            PoiUtil.copyRow(workbook, sheet2.getRow(2), sheet.createRow(in1.intValue() + 2), true);
+                            // 获取新加入的行
+                            HSSFRow row6 = sheet.getRow(in1.intValue() + 2);
+                            // 对其进行遍历每个单元格
+                            for (int k = 0; k < row6.getLastCellNum(); k++) {
+                                // 获取每个单元各种的数据
+                                String value2 = row6.getCell(k).getStringCellValue();
+                                // 判断如果与给定值相等，进行等值替换
+                                if (value2.equals(OfferConstant.TYPETOTAL)) {
+                                    //分类小计
+                                    row6.getCell(k).setCellValue(r.getTypetotal());
+                                } else {
+                                    // row6.getCell(k).setCellValue("#");
+                                }
                             }
                         }
+
 
                         // 获取报价单每个分类具体有多少个设备
                         Integer rsize = Integer.valueOf(r
@@ -368,10 +391,7 @@ public class EmailService {
                             // 对不少于1件的分类进行遍历操作
                             for (int w = 0; w < rsize.intValue(); w++) {
                                 // 每次插入一行空白行
-                                PoiUtil.insertRow(
-                                        sheet,
-                                        Integer.valueOf(w + in1.intValue() + 2),
-                                        Integer.valueOf(1));
+                                PoiUtil.insertRow(sheet, Integer.valueOf((w + 1) + in1.intValue() + 1), 1);
                                 // 每次插入赋值过来的样式
                                 PoiUtil.copyRow(
                                         workbook,
@@ -382,40 +402,46 @@ public class EmailService {
                                 Selectedresources s = (Selectedresources) r
                                         .getSelectedresources().get(w);
                                 // 需要赋值的行数
-                                HSSFRow row3 = sheet.getRow(w + in1.intValue()
-                                        + 2);
+                                HSSFRow row3 = sheet.getRow(w + in1.intValue() + 2);
+
                                 // 遍历每一行的每一列，将值传入需要赋值的行数
                                 for (int x = 0; x < row3.getLastCellNum(); x++) {
-
-                                    String value3 = row3.getCell(x)
-                                            .getStringCellValue().trim();
-
-                                    if (value3.equals(ResourceConstant.SIMPLENAME)) {//设备简称
-                                        row3.getCell(x).setCellValue(
-                                                s.getSimplename());
-                                    } else if (value3.equals(ResourceConstant.NAME)) {//设备规格,临时修改
-                                        row3.getCell(x).setCellValue(
-                                                s.getName());
-                                    } else if (value3.equals(ResourceConstant.NUMID)) {//序号
-                                        row3.getCell(x).setCellValue(
-                                                String.valueOf(w + 1));
-                                    } else if (value3.equals(ResourceConstant.AMOUNT)) {//设备数量
-                                        row3.getCell(x).setCellValue(
-                                                s.getAmount().toString());
-                                    } else if (value3.equals(ResourceConstant.UNIT)) {//设备单位
-                                        row3.getCell(x).setCellValue(
-                                                s.getUnit().toString());
-                                    } else if (value3.equals(ResourceConstant.DAYS)) {//设备天数
-                                        row3.getCell(x).setCellValue(
-                                                s.getDays().toString());
-                                    } else if (value3.equals(ResourceConstant.UNITPRICE)) {//设备单价
-                                        row3.getCell(x).setCellValue(
-                                                Double.toString(s
-                                                        .getUnitprice()));
-                                    } else if (value3.equals(ResourceConstant.SUBTOTAL)) {//设备单条小计
-                                        row3.getCell(x).setCellValue(
-                                                s.getSubTotal());
+                                    HSSFCell xdd = row3.getCell(x);
+                                    if (xdd != null) {
+                                        String value3 = row3.getCell(x).getStringCellValue();
+                                        if (value3.equals(ResourceConstant.SIMPLENAME)) {//设备简称
+                                            row3.getCell(x).setCellValue(
+                                                    s.getSimplename());
+                                        } else if (value3.equals(ResourceConstant.NAME)) {//设备规格,临时修改
+                                            row3.getCell(x).setCellValue(
+                                                    s.getName());
+                                        } else if (value3.equals(ResourceConstant.NUMID)) {//序号
+                                            row3.getCell(x).setCellValue(
+                                                    String.valueOf(w + 1));
+                                        } else if (value3.equals(ResourceConstant.AMOUNT)) {//设备数量
+                                            row3.getCell(x).setCellValue(
+                                                    s.getAmount().toString());
+                                        } else if (value3.equals(ResourceConstant.UNIT)) {//设备单位
+                                            row3.getCell(x).setCellValue(
+                                                    s.getUnit().toString());
+                                        } else if (value3.equals(ResourceConstant.DAYS)) {//设备天数
+                                            row3.getCell(x).setCellValue(
+                                                    s.getDays().toString());
+                                        } else if (value3.equals(ResourceConstant.UNITPRICE)) {//设备单价
+                                            row3.getCell(x).setCellValue(
+                                                    s.getUnitprice());
+                                        } else if (value3.equals(ResourceConstant.SUBTOTAL)) {//设备单条小计
+                                            row3.getCell(x).setCellValue(
+                                                    s.getSubTotal());
+                                        } else if (value3.equals(OfferConstant.TYPETOTAL)) {//分类小计
+                                            row3.getCell(x).setCellValue(
+                                                    r.getTypetotal());
+                                        }
+                                    } else if (xdd == null) {//空格
+                                        //xdd.setCellValue("dddddddd");
                                     }
+
+
                                 }
                             }
                         }
@@ -424,12 +450,12 @@ public class EmailService {
             }
 
         } catch (IOException e) {
-            // e.printStackTrace();
+            e.printStackTrace();
         } finally {
             try {
                 in.close();
             } catch (IOException e) {
-                // e.printStackTrace();
+                e.printStackTrace();
             }
         }
         return workbook;

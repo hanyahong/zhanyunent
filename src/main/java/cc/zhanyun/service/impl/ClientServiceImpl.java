@@ -62,6 +62,10 @@ public class ClientServiceImpl implements ClientService {
             cml.setWechat(client.getWechat());
             cml.setName(client.getName());
             cml.setQq(client.getQq());
+            cml.setCompany(client.getCompany());
+            cml.setTel(client.getTel());
+            cml.setEmail(client.getEmail());
+
             cml.setStatus(3);
             clientListRepo.addClientListOne(cml);
             //返回值设定

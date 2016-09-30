@@ -77,7 +77,8 @@ public class ImageServiceImpl implements ImageService {
             pro.setOid(RandomUtil.getRandomFileName());
             pro.setDate(new Date().toString());
             pro.setBasePath(url);
-            pro.setName(othername);
+            pro.setName(file.getOriginalFilename());
+            pro.setOtherName(othername);
             pro.setType(file.getContentType());
             pro.setUid(uid);
             pro.setSize(Long.valueOf(file.getSize()));
@@ -106,6 +107,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
     public Info delImageService(String oid, String ioid) {
+
         Info info = new Info();
         try {
             this.imageRepo.delImage(oid, ioid);
@@ -116,23 +118,13 @@ public class ImageServiceImpl implements ImageService {
         return info;
     }
 
-    public List<ImageProVO> selImagesByOid(String oid) {
+    public List<ImageProperty> selImagesByOid(String oid) {
         //置换集合
         List<ImageProVO> pvolist = new ArrayList<ImageProVO>();
         Image image = this.imageRepo.selImage(oid);
-        try {
-            List<ImageProperty> plist = image.getProperty();
 
-            for (ImageProperty p : plist) {
-                ImageProVO pvo = new ImageProVO();
-                pvo.setUrl(p.getUrl());
-                pvo.setOid(p.getOid());
-                pvolist.add(pvo);
-            }
-        } catch (Exception localException) {
-        }
-
-        return pvolist;
+        List<ImageProperty> plist = image.getProperty();
+        return plist;
     }
 
     public List<ImageProVO> selImagesByUid(String uid) {

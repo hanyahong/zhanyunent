@@ -20,14 +20,13 @@ public abstract interface FileService {
      */
     public abstract Info uploadFile(MultipartFile paramMultipartFile, String oid);
 
-
     /**
      * 文件批量上传
      *
      * @param oid
-     * @param files
+     * @param paramList
      */
-    public abstract List<Info> batchUploadFiles(List<MultipartFile> files, String oid);
+    public abstract List<Info> batchUploadFiles(List<MultipartFile> paramList, String oid);
 
     /**
      * 单个文件下载

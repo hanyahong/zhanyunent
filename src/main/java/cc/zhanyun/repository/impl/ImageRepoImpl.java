@@ -6,6 +6,7 @@ import cc.zhanyun.repository.ImageRepository;
 
 import java.util.List;
 
+import com.mongodb.BasicDBObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -26,10 +27,9 @@ public class ImageRepoImpl {
     }
 
     public void delImage(String oid, String ioid) {
-        Query query = Query.query(Criteria.where("_id").is(oid)
-                .and("property._id").is(ioid));
+        Query query = Query.query(Criteria.where("_id").is(oid));
         Update update = new Update();
-        update.pull("property", ".$");
+        update.pull("property", new BasicDBObject("_id", ioid));
         this.mongoTemplate.updateFirst(query, update, Image.class);
     }
 
@@ -56,7 +56,7 @@ public class ImageRepoImpl {
     public Integer removeLocationImage(String oid, String imageoid) {
         try {
             Query query = Query.query(Criteria.where("_id").is(oid)
-                    .and("image.imageProperty._id").is(imageoid));
+                    .and("property._id").is(imageoid));
             Update update = new Update();
             update.unset("image.$");
             this.mongoTemplate.updateFirst(query, update, Image.class);

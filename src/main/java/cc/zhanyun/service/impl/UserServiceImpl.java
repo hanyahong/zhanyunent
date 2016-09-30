@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
                 in.setOid(oid);
                 in.setToken(u.getToken());
                 //初始化默认资源分类
-                this.resourceType.saveTypeOfOneUser();
+                this.resourceType.saveTypeOfOneUser(oid);
 
                 Image image = new Image();
                 image.setOid(imageOid);
@@ -183,6 +183,7 @@ public class UserServiceImpl implements UserService {
                     msg.setOid(u.getOid());
                     msg.setStatus("登录成功");
                     msg.setToken(u.getToken());
+                    msg.setImages(u.getUserimage());
                 } else {
                     msg.setStatus("未授权");
                 }

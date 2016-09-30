@@ -6,6 +6,7 @@ import cc.zhanyun.repository.impl.ResourcesRepoImpl;
 import cc.zhanyun.service.ResourceListService;
 import cc.zhanyun.service.ResourceService;
 import cc.zhanyun.service.ResourceTypeService;
+import cc.zhanyun.util.RandomUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -153,7 +154,6 @@ public class ResourcesApi {
     }
 
 
-
     /**
      * 单条删除设备的分类
      *
@@ -272,6 +272,7 @@ public class ResourcesApi {
         return new ResponseEntity(info, HttpStatus.OK);
     }
 
+
     /**
      * 修改设备的分类归属
      *
@@ -308,6 +309,21 @@ public class ResourcesApi {
             @ApiParam(value = "条数", required = true) @PathVariable("size") Integer size)
             throws NotFoundException {
         return this.service.selResourceOneByType(type, num, size);
+    }
+
+
+    /**
+     * ceshi
+     *
+     * @throws NotFoundException
+     */
+    @ApiOperation(value = "(独立列表)测试", notes = "测试", response = Void.class)
+    @ApiResponses({@io.swagger.annotations.ApiResponse(code = 200, message = "添加成功", response = Void.class), @io.swagger.annotations.ApiResponse(code = 500, message = "添加失败", response = Void.class)})
+    @RequestMapping(value = {"/list/test"}, produces = {"application/json"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
+    public ResponseEntity<Void> resourcesListPostdd()
+            throws NotFoundException {
+        typeservice.saveTypeOfOneUser(RandomUtil.getRandomFileName());
+        return new ResponseEntity(HttpStatus.OK);
     }
 
 }

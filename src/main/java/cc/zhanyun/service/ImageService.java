@@ -3,6 +3,7 @@ package cc.zhanyun.service;
 import cc.zhanyun.model.Info;
 import cc.zhanyun.model.PageableInfo;
 import cc.zhanyun.model.image.Image;
+import cc.zhanyun.model.image.ImageProperty;
 import cc.zhanyun.model.vo.ImageProVO;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public abstract interface ImageService {
     public abstract Info delImageService(String paramString1,
                                          String paramString2);
 
-    public abstract List<ImageProVO> selImagesByOid(String paramString);
+    public abstract List<ImageProperty> selImagesByOid(String paramString);
 
     public abstract List<ImageProVO> selImagesByUid(String paramString);
 }
