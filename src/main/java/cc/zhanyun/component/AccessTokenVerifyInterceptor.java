@@ -1,4 +1,4 @@
-package cc.zhanyun.util;
+package cc.zhanyun.component;
 
 import cc.zhanyun.model.user.UserAccount;
 import cc.zhanyun.repository.impl.UserRepoImpl;
@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+
 @Component
 public class AccessTokenVerifyInterceptor extends HandlerInterceptorAdapter {
     @Autowired
@@ -25,21 +26,19 @@ public class AccessTokenVerifyInterceptor extends HandlerInterceptorAdapter {
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", " OPTIONS,GET, POST, PUT, DELETE,, HEAD");
-
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Expose-Headers", "token");
         response.setHeader("Expires", "-1");
         response.setHeader("Cache-Control", "no-cache");
         response.setHeader("pragma", "no-cache");
         response.setHeader("Content-Disposition", "attachment");
-        response.setHeader(
-                "Access-Control-Allow-Headers",
+        response.setHeader("Access-Control-Allow-Headers",
                 "token,Origin, No-Cache, x-requested-with,Content-Disposition,content-type, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, X-E4M-With");
 
         boolean flag = false;
 
         String accessToken = request.getHeader("token");
-//        String accessToken = "20160901101449";
+        //String accessToken = "20160901101449";
         if (StringUtils.isNotBlank(accessToken)) {
             UserAccount u = this.userRepoImpl.selUserByToken(accessToken);
             if (u != null) {
@@ -48,7 +47,7 @@ public class AccessTokenVerifyInterceptor extends HandlerInterceptorAdapter {
         }
         if (!flag) {
             response.setStatus(403);
-            response.getWriter().print("AccessToken ERROR");
+            response.getWriter().print("Token ERROR");
         }
 
         return flag;

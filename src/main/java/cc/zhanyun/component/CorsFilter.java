@@ -1,4 +1,4 @@
-package cc.zhanyun.util;
+package cc.zhanyun.component;
 
 import java.io.IOException;
 

@@ -50,6 +50,8 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
     @Autowired
     private ClientRepoImpl client;
     @Autowired
+    private ClientService clientService;
+    @Autowired
     private TokenUtil tokenutil;
     @Autowired
     private ImageService imageServiceImpl;
@@ -123,7 +125,7 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
             if (clientCompany != null) {
                 clientmanager.setCompany(clientCompany);
             }
-            this.client.addClient(clientmanager);
+            this.clientService.addClientOne(clientmanager);
         }
         return info;
     }
@@ -162,7 +164,7 @@ public class ProjectOfferServiceImpl implements ProjectOfferService {
                 if (clientCompany != null) {
                     clientmanager.setCompany(clientCompany);
                 }
-                this.client.addClient(clientmanager);
+                this.clientService.addClientOne(clientmanager);
             }
 
         } catch (Exception e) {

@@ -15,11 +15,20 @@ import java.util.List;
 @Service
 public interface ResourceListService {
     /**
+     * 原始数据(管理员临时)
+     *
+     * @return
+     */
+    public List<ResourceList> selDefaultResourceList(String type, String uid);
+
+
+    /**
      * 查询全部资源独立列表
      *
      * @return
      */
-    public List<ResourceList> selResourceListService(String type, Integer num ,Integer size);
+    public List<ResourceList> selResourceListService(String type, Integer num, Integer size);
+
 
     /**
      * 按照分类全部删除独立列表
@@ -36,6 +45,14 @@ public interface ResourceListService {
      * @return
      */
     public Info addResourceListService(List<ResourceList> resourceListList, String type);
+
+    /**
+     * 平台
+     *
+     * @param resourceListList
+     * @return
+     */
+    public Info addResourceDefault(List<ResourceList> resourceListList, String type, String uid);
 
     /**
      * 单条增加资源列表

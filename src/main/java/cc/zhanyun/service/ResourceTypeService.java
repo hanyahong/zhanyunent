@@ -8,6 +8,8 @@ import cc.zhanyun.model.resources.ResourcesTypes;
 import java.util.List;
 
 public abstract interface ResourceTypeService {
+    public List<ResourcesTypeOne> selDefault(String uid);
+
     //单条保存用户分类库(用户层面,单条增加类型集合)(默认初始化一个)
     public abstract void saveTypeOfOneUser(String uid);
 

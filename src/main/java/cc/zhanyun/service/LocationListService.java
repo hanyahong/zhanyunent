@@ -14,6 +14,23 @@ import java.util.List;
 @Service
 public interface LocationListService {
     /**
+     * 平台
+     *
+     * @return
+     */
+
+    public List<LocationList> selDefaultLocation(String uid);
+
+
+    /**
+     * 添加场地列表(批量)
+     *
+     * @param locationListList
+     * @return
+     */
+    public Info addDefaultLocation(List<LocationList> locationListList,String uid);
+
+    /**
      * 添加场地列表(批量)
      *
      * @param locationListList
@@ -22,7 +39,7 @@ public interface LocationListService {
     public Info addLocationListService(List<LocationList> locationListList);
 
     /**
-     * 按分类查询场地列表(批量)
+     * 查询场地列表(批量)
      *
      * @return
      */

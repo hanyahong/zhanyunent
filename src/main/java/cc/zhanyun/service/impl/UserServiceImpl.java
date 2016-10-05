@@ -2,6 +2,8 @@ package cc.zhanyun.service.impl;
 
 import cc.zhanyun.model.Info;
 import cc.zhanyun.model.image.Image;
+import cc.zhanyun.model.resources.ResourceList;
+import cc.zhanyun.model.resources.Resources;
 import cc.zhanyun.model.resources.ResourcesTypeOne;
 import cc.zhanyun.model.resources.ResourcesTypes;
 import cc.zhanyun.model.user.*;
@@ -95,6 +97,7 @@ public class UserServiceImpl implements UserService {
                 //初始化默认资源分类
                 this.resourceType.saveTypeOfOneUser(oid);
 
+                //ddddd
                 Image image = new Image();
                 image.setOid(imageOid);
                 image.setUid(oid);

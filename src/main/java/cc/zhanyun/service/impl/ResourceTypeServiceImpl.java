@@ -27,7 +27,16 @@ public class ResourceTypeServiceImpl
     private ResourcesTypeRepoImpl typeRepo;
     @Autowired
     private TokenUtil token;
+    /**
+     * 查询分类
+     *
+     * @return
+     */
+    public List<ResourcesTypeOne> selDefault(String uid) {
+        ResourcesTypes resourcesTypes = this.typeRepo.selResourceTypeOne( uid);
 
+        return resourcesTypes.getTypelist();
+    }
 
     /**
      * 初始化分类

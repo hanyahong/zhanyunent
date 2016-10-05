@@ -31,6 +31,41 @@ public class LocationListServiceImpl implements LocationListService {
     @Autowired
     private TokenUtil tokenUtil;
 
+    @Override
+    public List<LocationList> selDefaultLocation(String uid) {
+        List<LocationList> llist = locationListRepo.selLocationList(uid);
+        return llist;
+    }
+
+    @Override
+    public Info addDefaultLocation(List<LocationList> locationListList,String uid) {
+        Info info = new Info();
+        String oid = RandomUtil.getRandomFileName();
+        try {
+            for (LocationList l : locationListList) {
+
+                //添加场地
+                Location location = new Location();
+                location.setOid(oid);
+                location.setAddress(l.getAddress());
+                location.setWebsite(l.getWebsite());
+                location.setName(l.getName());
+                location.setPhone(l.getPhone());
+                location.setContacts(l.getContacts());
+                lri.addLocation(location);
+                //添加场地独立列表
+                l.setOid(oid);
+                l.setUid(uid);
+                locationListRepo.addLocationList(l);
+            }
+            //返回值设置
+            info.setStatus("y");
+        } catch (Exception e) {
+            info.setStatus("n");
+        }
+        return info;
+    }
+
     /**
      * 增加场地独立列表
      *

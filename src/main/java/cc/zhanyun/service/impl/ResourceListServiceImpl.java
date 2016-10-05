@@ -36,6 +36,12 @@ public class ResourceListServiceImpl implements ResourceListService {
     @Autowired
     private TokenUtil tokenUtil;
 
+    @Override
+    public List<ResourceList> selDefaultResourceList(String type, String uid) {
+        //查询默认
+        return resourceListRepo.selResourceListByUidAndType(uid, type, null);
+    }
+
     /**
      * 按照分类查询资源列表
      *
@@ -85,6 +91,38 @@ public class ResourceListServiceImpl implements ResourceListService {
     @Override
     public Info addResourceListService(List<ResourceList> resourceListList, String type) {
         String uid = tokenUtil.tokenToOid();
+        String oid = RandomUtil.getRandomFileName();
+        Info info = new Info();
+        try {
+
+            //遍历
+            for (ResourceList r : resourceListList) {
+
+                Resources resources = new Resources();
+
+                resources.setUid(uid);
+                resources.setOid(oid);
+                resources.setName(r.getName());
+                resources.setClassification(type);
+                resources.setSimplename(r.getSimplename());
+                resources.setUnitprice(r.getUnitprice());
+                resources.setUnit(r.getUnit());
+                //新增资源
+                resourcesRepo.addResources(resources);
+                //新增独立资源列表
+                r.setOid(oid);
+                r.setUid(uid);
+                resourceListRepo.addResourceList(r);
+            }
+            info.setStatus("y");
+        } catch (Exception e) {
+            info.setStatus("n");
+        }
+        return info;
+    }
+
+    @Override
+    public Info addResourceDefault(List<ResourceList> resourceListList, String type, String uid) {
         String oid = RandomUtil.getRandomFileName();
         Info info = new Info();
         try {

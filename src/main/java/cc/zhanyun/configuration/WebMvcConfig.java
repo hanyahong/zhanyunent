@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import cc.zhanyun.util.AccessTokenVerifyInterceptor;
+import cc.zhanyun.component.AccessTokenVerifyInterceptor;
 
 @Configuration
 public class WebMvcConfig extends WebMvcConfigurerAdapter {

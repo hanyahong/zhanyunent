@@ -9,10 +9,8 @@ import javax.mail.internet.MimeMessage;
 
 import cc.zhanyun.model.*;
 import cc.zhanyun.util.constant.*;
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -28,7 +26,7 @@ import cc.zhanyun.repository.impl.UserRepoImpl;
 import cc.zhanyun.util.RandomUtil;
 import cc.zhanyun.util.TokenUtil;
 import cc.zhanyun.util.fileutil.FileUtil;
-import cc.zhanyun.util.myutil.PoiUtil;
+import cc.zhanyun.util.excel.PoiUtil;
 
 @Service
 public class EmailService {
@@ -348,7 +346,7 @@ public class EmailService {
                             // 获取每个单元各种的数据
                             String value2 = row2.getCell(k).getStringCellValue();
                             // 判断如果与给定值相等，进行等值替换
-                             System.out.print("-----"+k+value2);
+                           //  System.out.print("-----"+k+value2);
                             if (value2.equals(ResourceConstant.RESOURCETYPE)) {//资源分类归属
                                 row2.getCell(k).setCellValue(r.getName());
                                 // System.out.print(r.getName());
@@ -358,7 +356,8 @@ public class EmailService {
                         }
                         //模板样式选择
                         HSSFSheet sheet3 = workbook.getSheetAt(2);// 获取sheet2中的样式
-                        if (!sheet3.getRow(0).getCell(1).getStringCellValue().equals(ExcelConstant.MODEL2)) {
+                        String value =sheet3.getRow(0).getCell(1).getStringCellValue().trim();
+                        if (value.equals(ExcelConstant.MODEL2)) {
 
                         } else {
                             //第二行数据 插入空白行 1行
@@ -434,7 +433,7 @@ public class EmailService {
                                             row3.getCell(x).setCellValue(
                                                     s.getSubTotal());
                                         } else if (value3.equals(OfferConstant.TYPETOTAL)) {//分类小计
-                                            row3.getCell(x).setCellValue(
+                                            row3.getCell(x).setCellValue("¥" +
                                                     r.getTypetotal());
                                         }
                                     } else if (xdd == null) {//空格
