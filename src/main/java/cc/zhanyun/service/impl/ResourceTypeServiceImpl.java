@@ -27,13 +27,14 @@ public class ResourceTypeServiceImpl
     private ResourcesTypeRepoImpl typeRepo;
     @Autowired
     private TokenUtil token;
+
     /**
      * 查询分类
      *
      * @return
      */
     public List<ResourcesTypeOne> selDefault(String uid) {
-        ResourcesTypes resourcesTypes = this.typeRepo.selResourceTypeOne( uid);
+        ResourcesTypes resourcesTypes = this.typeRepo.selResourceTypeOne(uid);
 
         return resourcesTypes.getTypelist();
     }
@@ -41,30 +42,31 @@ public class ResourceTypeServiceImpl
     /**
      * 初始化分类
      */
-    public void saveTypeOfOneUser(String uid) {
+    public void saveTypeOfOneUser(String uid,String type1,String type2,String type3) {
         ResourcesTypes resourcesTypes = new ResourcesTypes();
         resourcesTypes.setOid(uid);
         resourcesTypes.setUid(uid);
         List<ResourcesTypeOne> rtList = new ArrayList<ResourcesTypeOne>();
         ResourcesTypeOne one1 = new ResourcesTypeOne();
 
-
-        one1.setOid(RandomUtil.getRandomFileName());
+        one1.setOid(type1);
         one1.setName("视频");
         rtList.add(one1);
 
         ResourcesTypeOne one2 = new ResourcesTypeOne();
         one2.setName("音频");
-        one2.setOid(RandomUtil.getRandomFileName());
+        one2.setOid(type2);
         rtList.add(one2);
 
         ResourcesTypeOne one3 = new ResourcesTypeOne();
-        one3.setOid(RandomUtil.getRandomFileName());
+        one3.setOid(type3);
         one3.setName("灯光");
         rtList.add(one3);
 
         //添加
         resourcesTypes.setTypelist(rtList);
+
+        //返回值设定
         this.typeRepo.saveResourceType(resourcesTypes);
     }
 

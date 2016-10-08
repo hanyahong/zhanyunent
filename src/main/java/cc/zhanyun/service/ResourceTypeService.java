@@ -11,7 +11,7 @@ public abstract interface ResourceTypeService {
     public List<ResourcesTypeOne> selDefault(String uid);
 
     //单条保存用户分类库(用户层面,单条增加类型集合)(默认初始化一个)
-    public abstract void saveTypeOfOneUser(String uid);
+    public abstract void saveTypeOfOneUser(String uid, String type1, String type2, String type3);
 
     //查询分类
     public abstract List<ResourcesTypeOne> selTypeOfOneUser();

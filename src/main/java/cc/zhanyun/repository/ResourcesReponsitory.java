@@ -12,6 +12,5 @@ public abstract interface ResourcesReponsitory extends
     public abstract List<Resources> findByUid(String paramString, Pageable pageable);
 
     public abstract List<Resources> findByClassificationAndUid(
-            String paramString1, String paramString2, Pageable pageable
-    );
+            String paramString1, String paramString2, Pageable pageable);
 }

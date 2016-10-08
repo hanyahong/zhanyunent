@@ -11,6 +11,7 @@ import cc.zhanyun.repository.impl.UserRepoImpl;
 import cc.zhanyun.repository.impl.UserSmsRepoImpl;
 import cc.zhanyun.service.ImageService;
 import cc.zhanyun.service.ResourceTypeService;
+import cc.zhanyun.service.UserInitializationService;
 import cc.zhanyun.service.UserService;
 import cc.zhanyun.util.RandomUtil;
 import cc.zhanyun.util.TokenUtil;
@@ -39,6 +40,8 @@ public class UserServiceImpl implements UserService {
     private TokenUtil token;
     @Autowired
     private ImageService imageService;
+    @Autowired
+    private UserInitializationService userInitializationService;
 
     /**
      * 用户注册
@@ -86,22 +89,19 @@ public class UserServiceImpl implements UserService {
                 u.setEmail(user.getEmail());
                 u.setUsername(user.getUsername());
                 u.setUserimage(imageOid);
-
                 u.setToken(token);
-
                 this.uri.addUser(u);
 
-                in.setStatus("注册成功");
-                in.setOid(oid);
-                in.setToken(u.getToken());
-                //初始化默认资源分类
-                this.resourceType.saveTypeOfOneUser(oid);
-
-                //ddddd
+                String type1 = RandomUtil.createRandomVcode();
+                String type2 = RandomUtil.createRandomVcode();
+                String type3 = RandomUtil.createRandomVcode();
+                this.resourceType.saveTypeOfOneUser(oid, type1, type2, type3);//初始化默认资源分类
+                this.userInitializationService.InitUserResources(oid, type1, type2, type3);//初始化用户原始资源
+                this.userInitializationService.InitUserLocation(oid);//初始化原始场地
+                //初始化头像图库
                 Image image = new Image();
                 image.setOid(imageOid);
                 image.setUid(oid);
-
                 this.imageService.saveImageService(image);
                 // 返回
                 in.setOid(oid);

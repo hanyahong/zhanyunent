@@ -50,9 +50,9 @@ public class LocationRepoImpl {
 
         for (Location l : rlist) {
             LocationVO lvo = new LocationVO();
-            lvo.setOid(l.getOid());
-            lvo.setName(l.getName());
-            lvo.setAddress(l.getAddress());
+            lvo.setOid(l.getOid());//ID
+            lvo.setName(l.getName());//名称
+            lvo.setAddress(l.getAddress());//地址
             lvlist.add(lvo);
         }
 
@@ -67,8 +67,6 @@ public class LocationRepoImpl {
      */
     public Location selLocationById(String oid) {
         Location location = (Location) this.locationRepo.findOne(oid);
-        System.out.println(location.getAddress() + location.getName());
-        System.out.println(location.getOid());
         return location;
     }
 
@@ -93,14 +91,10 @@ public class LocationRepoImpl {
         basicDBObject
                 .put("$set", new BasicDBObject("name", location
                         .getName())
-                        .append("website", location.getWebsite())
-                        .append("name", location.getName())
-                        .append("amount", location.getAddress())
+                        .append("website", location.getWebsite())//网址
+                        .append("name", location.getName())//名称
                 );
-
-
         Update update = new BasicUpdate(basicDBObject);
-
         this.mongoTemplate.upsert(new Query(
                 Criteria.where("_id").is(location.getOid())), update, "location");
     }
@@ -120,7 +114,6 @@ public class LocationRepoImpl {
                         .append("phone", location.getPhone())//联系电话
                         .append("contacts", location.getContacts())//联系人
                         .append("website", location.getContacts())//网址
-
                 );
         Update update = new BasicUpdate(basicDBObject);
 

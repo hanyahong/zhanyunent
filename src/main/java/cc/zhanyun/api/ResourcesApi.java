@@ -312,19 +312,6 @@ public class ResourcesApi {
     }
 
 
-    /**
-     * ceshi
-     *
-     * @throws NotFoundException
-     */
-    @ApiOperation(value = "(独立列表)测试", notes = "测试", response = Void.class)
-    @ApiResponses({@io.swagger.annotations.ApiResponse(code = 200, message = "添加成功", response = Void.class), @io.swagger.annotations.ApiResponse(code = 500, message = "添加失败", response = Void.class)})
-    @RequestMapping(value = {"/list/test"}, produces = {"application/json"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
-    public ResponseEntity<Void> resourcesListPostdd()
-            throws NotFoundException {
-        typeservice.saveTypeOfOneUser(RandomUtil.getRandomFileName());
-        return new ResponseEntity(HttpStatus.OK);
-    }
 
 }
 

@@ -43,32 +43,27 @@ public class LocationServiceImpl implements LocationService {
      * @return
      */
     public LocationImageOidVO addLocation(Location location) {
+        LocationImageOidVO li = new LocationImageOidVO();//返回值载体函数
 
-        LocationImageOidVO livo = new LocationImageOidVO();
-        String oid = RandomUtil.getRandomFileName();
-        String uid = this.tokenutil.tokenToOid();
-        String locationImage = RandomUtil.getRandomFileName();
-
-        List<Houses> house = location.getHouses();
-
-        LocationImageOidVO li = new LocationImageOidVO();
-        List<LocationImageHouseOidVO> hilist = new ArrayList();
-
+        String oid = RandomUtil.getRandomFileName();//场地ID
+        String uid = this.tokenutil.tokenToOid();//用户归属ID
+        String locationImage = RandomUtil.getRandomFileName();//场地效果图图库ID
+        List<Houses> house = location.getHouses();//获取场地房间
+        List<LocationImageHouseOidVO> hilist = new ArrayList();//创建房间集合函数
         try {
+            //创建场地效果图图片库
             Image image = new Image();
             image.setOid(locationImage);
             image.setUid(uid);
-
             this.imageServiceImpl.saveImageService(image);
-
+            //如果场地房间不为空
             if (house.size() != 0) {
                 for (Houses h : house) {
-                    //添加场地效果图图片库
-                    String houseImages = RandomUtil.getRandomFileName();
-                    String houseCaseImages = RandomUtil.getRandomFileName();
-                    h.setImages(houseImages);
+                    String houseImages = RandomUtil.getRandomFileName();//房间照片图库ID
+                    String houseCaseImages = RandomUtil.getRandomFileName();//房间案例图库ID
+                    h.setImages(houseImages);//
                     h.setCaseimages(houseCaseImages);
-                    //添加场地图片库
+                    //添加场地房间图片库
                     Image image2 = new Image();
                     image2.setOid(houseImages);
                     image2.setUid(uid);
@@ -82,17 +77,16 @@ public class LocationServiceImpl implements LocationService {
                     LocationImageHouseOidVO lihovo = new LocationImageHouseOidVO();
                     lihovo.setImages(houseImages);
                     lihovo.setCaseImages(houseCaseImages);
-
-                    hilist.add(lihovo);
+                    hilist.add(lihovo);//添加
                 }
                 li.setLhlist(hilist);
             }
-            //添加场地
+
             location.setHouses(house);
             location.setOid(oid);
             location.setUid(uid);
-            location.setImages(locationImage);
-            this.locationRepo.addLocation(location);
+            location.setImages(locationImage);//场地效果图设置
+            this.locationRepo.addLocation(location);//添加场地
             //添加场地独立列表
             LocationList locationList = new LocationList();
             locationList.setUid(uid);
@@ -104,13 +98,13 @@ public class LocationServiceImpl implements LocationService {
             locationList.setStatus(3);
             locationListRepo.addLocationList(locationList);
             //返回值设定
-            livo.setOid(oid);
-            livo.setLocationimages(locationImage);
-            livo.setLhlist(hilist);
+            li.setOid(oid);
+            li.setLocationimages(locationImage);
+            li.setLhlist(hilist);
         } catch (Exception e) {
             // e.printStackTrace();
         }
-        return livo;
+        return li;
     }
 
     /**

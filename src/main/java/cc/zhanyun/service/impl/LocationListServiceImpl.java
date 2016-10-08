@@ -2,11 +2,14 @@ package cc.zhanyun.service.impl;
 
 import cc.zhanyun.model.Info;
 import cc.zhanyun.model.PageableInfo;
+import cc.zhanyun.model.image.Image;
+import cc.zhanyun.model.location.Images;
 import cc.zhanyun.model.location.Location;
 import cc.zhanyun.model.location.LocationList;
 import cc.zhanyun.model.vo.LocationImageOidVO;
 import cc.zhanyun.repository.impl.LocationListRepoImpl;
 import cc.zhanyun.repository.impl.LocationRepoImpl;
+import cc.zhanyun.service.ImageService;
 import cc.zhanyun.service.LocationListService;
 import cc.zhanyun.service.LocationService;
 import cc.zhanyun.util.RandomUtil;
@@ -30,6 +33,8 @@ public class LocationListServiceImpl implements LocationListService {
     private LocationRepoImpl lri;
     @Autowired
     private TokenUtil tokenUtil;
+    @Autowired
+    private ImageService imageService;
 
     @Override
     public List<LocationList> selDefaultLocation(String uid) {
@@ -38,7 +43,7 @@ public class LocationListServiceImpl implements LocationListService {
     }
 
     @Override
-    public Info addDefaultLocation(List<LocationList> locationListList,String uid) {
+    public Info addDefaultLocation(List<LocationList> locationListList, String uid) {
         Info info = new Info();
         String oid = RandomUtil.getRandomFileName();
         try {
@@ -142,6 +147,7 @@ public class LocationListServiceImpl implements LocationListService {
     public Info addLocationListOne(LocationList locationList) {
         String uid = tokenUtil.tokenToOid();
         String oid = RandomUtil.getRandomFileName();
+        String imageOid = RandomUtil.getRandomFileName();
         locationList.setOid(oid);
         locationList.setUid(uid);
         Info info = new Info();
@@ -150,13 +156,21 @@ public class LocationListServiceImpl implements LocationListService {
             locationListRepo.addLocationList(locationList);
             //增加场地
             Location location = new Location();
-            location.setOid(locationList.getOid());
-            location.setUid(locationList.getUid());
-            location.setContacts(locationList.getContacts());
-            location.setName(locationList.getName());
-            location.setAddress(locationList.getAddress());
-            location.setPhone(locationList.getPhone());
+            location.setOid(locationList.getOid());//唯一ID
+            location.setUid(locationList.getUid());//用户归属
+            location.setContacts(locationList.getContacts());//联系人
+            location.setName(locationList.getName());//场地名称
+            location.setAddress(locationList.getAddress());//地址
+            location.setPhone(locationList.getPhone());//电话
+            location.setWebsite(locationList.getWebsite());//网址
+            location.setImages(imageOid);//设置图片库oid
             lri.addLocation(location);
+
+            //初始化图库
+            Image image = new Image();
+            image.setUid(uid);//用户归属
+            image.setOid(imageOid);//图库唯一ID
+            imageService.saveImageService(image);
             //返回值设定
             info.setStatus("y");
         } catch (Exception e) {
@@ -239,7 +253,6 @@ public class LocationListServiceImpl implements LocationListService {
             System.out.print(l.getStatus());
             //判断:1 表示新增,2表示修改
             if (l.getStatus() == 1) {
-
                 l.setStatus(3);
                 //增加场地
                 addLocationListOne(l);

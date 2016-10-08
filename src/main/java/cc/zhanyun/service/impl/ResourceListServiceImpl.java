@@ -97,7 +97,6 @@ public class ResourceListServiceImpl implements ResourceListService {
 
             //遍历
             for (ResourceList r : resourceListList) {
-
                 Resources resources = new Resources();
 
                 resources.setUid(uid);
@@ -123,15 +122,13 @@ public class ResourceListServiceImpl implements ResourceListService {
 
     @Override
     public Info addResourceDefault(List<ResourceList> resourceListList, String type, String uid) {
-        String oid = RandomUtil.getRandomFileName();
         Info info = new Info();
         try {
 
             //遍历
             for (ResourceList r : resourceListList) {
-
+                String oid = RandomUtil.getRandomFileName();
                 Resources resources = new Resources();
-
                 resources.setUid(uid);
                 resources.setOid(oid);
                 resources.setName(r.getName());
@@ -141,6 +138,7 @@ public class ResourceListServiceImpl implements ResourceListService {
                 resources.setUnit(r.getUnit());
                 //新增资源
                 resourcesRepo.addResources(resources);
+
                 //新增独立资源列表
                 r.setOid(oid);
                 r.setUid(uid);

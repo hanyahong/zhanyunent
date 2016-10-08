@@ -99,7 +99,7 @@ public class LocationApi {
     @RequestMapping(value = {"/{oid}"}, produces = {"application/json"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET})
     @ResponseBody
     public Location locaitonLocationIdGet(
-            @ApiParam(value = "客户ID", required = true) @PathVariable("oid") String oid)
+            @ApiParam(value = "场地ID", required = true) @PathVariable("oid") String oid)
             throws NotFoundException {
         return this.service.selLocationInfo(oid);
     }
