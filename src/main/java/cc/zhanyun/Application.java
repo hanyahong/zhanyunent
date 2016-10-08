@@ -50,16 +50,15 @@ public class Application {
     }
 
     @Bean
-/*    */ public MultipartConfigElement multipartConfigElement()
-/*    */ {
-/* 24 */
+    public MultipartConfigElement multipartConfigElement() {
+
         MultipartConfigFactory factory = new MultipartConfigFactory();
-/* 25 */
+
         factory.setMaxFileSize("20480KB");
-/* 26 */
+
         factory.setMaxRequestSize("20480KB");
-/* 27 */
+
         return factory.createMultipartConfig();
-/*    */
+
     }
 }
